@@ -1,0 +1,74 @@
+[
+  {
+    "id": 1,
+    "title": "MESA PARA TV MODELO MINIMALISTA",
+    "description": "Disfruta del espacio en tu living con el Rack para Tv Modelo España de Factory Muebles. Este Rack minimalista es de 1.20m de largo capaz de cargar un Led de Hasta 52. Ademas posee multiples espacios para el orden de tus aparatos electronicos como Dvd, Playstation, Amplificadores, Parlantes, Sistemas de Audio...etc...",
+    "price": 200,
+    "thumbnail": "https://acdn.mitiendanube.com/stores/865/441/products/mesaparatv-modelo-espania-madera-factorymuebles1-1dc6eb1c3f4215898715790971116615-640-0.webp",
+    "code": "abc123",
+    "stock": 10
+  },
+  {
+    "id": 2,
+    "title": "MESA MODULAR RACK MODELO BARCELONA",
+    "description": "Disfruta del espacio en tu living con el modular para Tv Modelo Barcelona de Factory Muebles. Este modular cuenta con una mesa de tv/led de 1.80m de largo. Ademas posee multiples espacios para el orden de tus aparatos electronicos como Dvd, Playstation, Amplificadores, Parlantes, Sistemas de Audio etc. Doble espacio interno con puertas rebatibles, lo que permite guardar desde libros, cuadernos etc. hasta frasadas, acolchados y todo lo que se te ocurra. Construido integramente en Melamina de 18mm y con Bisagras en puerta de primera calidad. Colores a eleccion Blanco, Negro, Haya, Cedro o Wengue",
+    "price": 189.999,
+    "thumbnail": "https://acdn.mitiendanube.com/stores/865/441/products/mesa-tv-led-factorymuebles-barcelona1-27ead1c281c4f1f4c915524211645204-640-0.webp",
+    "code": "acb1234",
+    "stock": 11
+  },
+  {
+    "id": 3,
+    "title": "MODULAR MESA TV RACK MODELO VALENCIAGA",
+    "description": "¡Incluye Cordones Blancos y Negros! Zapatilla eco cuero blanco y descarne Negro. Detalles: Capellada, caña en eco cuero blanco. Lengua, ojalillera, talonera, puntera y apliques de caña descarne negro. Forrería de poliéster 100% bondeada de color blanco. Plantilla extraíble de eva y base textil. Relleno de espuma en cuello y lengua para mayor confort. Cordones de nylon blanco y negro. Contrafuerte de caucho recuperado. Suela exterior de caucho moldeado de alta resistencia color blanco y suelín negro. Costura black en base para reforzar el pegado",
+    "price": 199.999,
+    "thumbnail": "https://acdn.mitiendanube.com/stores/865/441/products/valencia-mueblemodular-melamina-biblioteca-factorymuebles11-ff24fc750e0cc341f015351195026255-640-0.webp",
+    "code": "acbd123",
+    "stock": 5
+  },
+  {
+    "id": 4,
+    "title": "PLACAR ROPERO MELAMINA BLANCO",
+    "description": "Nuestros placares estan realizados en melamina de 18mm y las configuraciones poseen laterales, lo que garantiza una excelente terminacion y una estructura robusta. El pegado de cantos es mecanizado por una pegadora de cantos de PVC de ultima tecnologia lo que permite un mejor pegado en los bordes",
+    "price": 319.999,
+    "thumbnail": "https://acdn.mitiendanube.com/stores/865/441/products/placard-melamina-factorymuebles-2002b-sincartel1-0960e67b61be1dc39516200042664633-640-0.webp",
+    "code": "abcd1234",
+    "stock": 2
+  },
+  {
+    "id": 5,
+    "title": "PLACAR ROPERO MODELO VINTAGE",
+    "description": "Placard Nordico de Melamina de 18mm. Ideal para 1 persona con poco espacio. Su configuración de 3 cubos es ideal para el guardado de remeras, pullovers, sweaters, también posee 3 cajones, un barral para colgar ropa.",
+    "price": 109.999,
+    "thumbnail": "https://acdn.mitiendanube.com/stores/865/441/products/placard-escandinavo-factory-muebles-patas-madera1-6b7f1fb7f7c0734a8316042872084485-640-0.webp",
+    "code": "abc1235",
+    "stock": 4
+  },
+  {
+    "id": 6,
+    "title": "PLACAR EN 3 MODULOS",
+    "description": "Placard de Melamina de 18mm. Armado en 3 modulos individuales.",
+    "price": 199.999,
+    "thumbnail": "https://acdn.mitiendanube.com/stores/865/441/products/placard-melamina-factorymuebles-2002masbaulera1-706a24c89d1b55653016327605949291-480-0.webp",
+    "code": "abc12356",
+    "stock": 30
+  },
+  {
+    "id": 7,
+    "title": "MESA RATONA ELEVABLE MODELO MODERNO",
+    "description": "Material: Melamina 18mm Medidas: CERRADA: 90cmx40cmx60cm (Largo x Alto x Prof) Aprox. 53cm LEVANTADA",
+    "price": 89.999,
+    "thumbnail": "https://acdn.mitiendanube.com/stores/865/441/products/mesa-ratona-luna-factory-muebles11-695a7293660fea175d16178916571554-640-0.webp",
+    "code": "abc123567",
+    "stock": 15
+  },
+  {
+    "id": 8,
+    "title": "MESA RATONA MODELO GEO",
+    "description": "Color: a eleccion - negro, blanco, wengue, cedro, haya, atakama, olmo fidia (se puede combinar) Material: Melamina 18mm Medidas: 90x31x45cm (Largo x Alto x Prof)",
+    "price": 99.999,
+    "thumbnail": "https://acdn.mitiendanube.com/stores/865/441/products/mesa-ratona-geo11-4b1c00e7406f3b0dd516206643942809-640-0.webp",
+    "code": "abc1238",
+    "stock": 6
+  }
+]
