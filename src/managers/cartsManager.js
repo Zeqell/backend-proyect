@@ -4,8 +4,6 @@ const path = './src/mockDB/carts.json'
 class CartsManagerFile {
     constructor() {
         this.path = path
-        // this.carts = []
-        // this.products = []
     }
     readFile = async () => {
         try {
