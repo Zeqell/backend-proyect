@@ -1,11 +1,7 @@
 [
     {
-        "id": 1,
-        "cart": [
-            {
-                "productId": "2",
-                "quantity": 2
-            },
+        "id": "tc4hp6",
+        "products": [
             {
                 "productId": "1",
                 "quantity": 1

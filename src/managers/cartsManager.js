@@ -1,7 +1,7 @@
 const fs = require('node:fs')
 const path = './src/mockDB/carts.json'
 
-class CartsManagerFile {
+class CartsManager{
     constructor() {
         this.path = path
     }
@@ -14,50 +14,54 @@ class CartsManagerFile {
             return []
         }
     }
-    getCartById = async (cid) => {
-        const carts = await this.readFile()
-        const cart = carts.find(cart => cart.id === cid)
-        if (!cart) {
-            return res.status(404).send('No se encuentra el carrito con el id dado')
-        }
-        res.status(200).send(cart)
+    // Método para obtener los carritos.
+    async getCarts() {
+        const data = await fs.promises.readFile(this.cartPath, 'utf-8')
+        return JSON.parse(data)
     }
-    createCart = async () => {
-        const carts = this.readFile()
-        let newCart
-        if (carts.length === 0) {
-            newCart = { id: 1, products: [] }
-        } else {
-            newCart = { id: carts.length + 1, products: [] }
-        }
+
+    // Método para obtener un carrito por ID.
+    async getCartById(cartId) {
+        const carts = await this.getCarts()
+        return carts.find(cart => cart.id === cartId)
+    }
+
+    // Método para crear un carrito.
+    async createCart() {
+        const carts = await this.getCarts()
+        const newCart = { id: this.generateId(), products: [] }
         carts.push(newCart)
-        const results = await fs.promises.writeFile(this.path, JSON.stringify(carts, null, 2), 'utf-8')
-        return results
+        await this.writeCarts(carts)
+        return newCart
     }
-    addProductToCart = async (cid, pid) => {
-        const carts = await this.readFile()
-        const cart = carts.find(cart => cart.id === cid)
-        if (!cart) {
-            return res.status(404).send('No se encuentra el carrito con el id dado')
+
+    // Método para agregar un producto a un carrito.
+    async addToCart(cartId, productId, quantity = 1) {
+        const carts = await this.getCarts()
+        const cartIndex = carts.findIndex(cart => cart.id === cartId)
+
+        if (cartIndex === -1) {
+            throw new Error('No se encuentra el Carrito.')
         }
-        const products = this.readFile()
-        const productId = products.find(product => product.id ===pid)
-        if (!productId) {
-            return res.status(404).send('No se encuentra el producto con el id dado')
+
+        const existingProductIndex = carts[cartIndex].products.findIndex(p => p.product.id === productId)
+
+        if (existingProductIndex !== -1) {
+            // Si el producto existe actualizamos la cantidad.
+            carts[cartIndex].products[existingProductIndex].quantity += quantity
+        } else {
+            // Si no existe agregamos el producto al carrito.
+            carts[cartIndex].products.push({ productId, quantity })
         }
-        const newProduct = {
-            productId: pid,
-            quantity: 1
-        }
-        cart.products.push(newProduct)
-        res.status(201).send(newProduct)
+
+        await this.writeCarts(carts)
+        return carts[cartIndex]
     }
-    deleteCart = async (cid) => {
-        const carts = await this.getCartById()
-        if (!carts.some(cart => cart.id === cid)) return console.log('error al eliminar producto de carrito.')
-        const cartsDelete = carts.splice(carts, 1);
-        await fs.promises.writeFile(this.path, JSON.stringify(cartsDelete, null, 2), 'utf-8')
-        console.log('Producto eliminado del carrito.')
+
+    // Generamos un Id aleatorio para el carrito.
+    generateId() {
+        return Math.random().toString(36).substring(7)
     }
 }
-module.exports = CartsManagerFile
+
+module.exports = CartsManager

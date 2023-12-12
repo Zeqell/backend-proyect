@@ -1,5 +1,28 @@
-{{> datatablesProducts }}  
-
-
-<script src="/socket.io/socket.io.js"></script>
-<script src="/js/product.js"></script>
+<div>
+    <h1>Bienvenido {{name}}</h1>
+</div>
+<div>
+    <h2>Listado de Productos</h2>
+    <table class="uk-table uk-table-striped uk-table-hover">
+        <thead>
+            <tr>
+                <th>Código</th>
+                <th>Título</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Stock</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each prodList}}
+                <tr>
+                    <td>{{this.code}}</td>
+                    <td>{{this.title}}</td>
+                    <td>{{this.description}}</td>
+                    <td>${{this.price}}</td>
+                    <td>{{this.stock}}</td>
+                </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</div>

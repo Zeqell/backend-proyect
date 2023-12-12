@@ -1,36 +1,17 @@
 const { Router } = require('express')
+const ProductManager = require('../managers/productsManagerFile')
 
-const router = Router()
+const viewsRouter = Router()
+const productManager = new ProductManager('../mockDB/products.json')
 
-const productMock = [
-    {id:'1', title: 'Product 1', price: 1500, stock: 100, description: 'Esto es un prod. '},
-    {id:'2', title: 'Product 2', price: 1500, stock: 100, description: 'Esto es un prod. '},
-    {id:'3', title: 'Product 3', price: 1500, stock: 100, description: 'Esto es un prod. '},
-]
-
-router.get('/', (req,res)=> {
-    res.render('index', {
-        title: 'Mercadito Eze', 
-        name: 'El mejor',
-        style: 'index.css'
-    })
+viewsRouter.get('/', async (req, res) => {
+    const prodList = await productManager.getProducts()
+    res.render('home', { title: 'Listado de Productos', name: 'Usuario de Prueba', prodList })
 })
 
-router.get('/prod', (req, res) => {
-    
-    const userMock = {
-        title: 'Mercadito Fede', 
-        name: 'Fede el mejor',
-        role:  'admin'
-    }
-
-    res.render('products', {
-        title: userMock.title, 
-        name: userMock.name,
-        isAdmin: userMock.role === 'admin',
-        products: productMock,
-        style: 'products.css'
-    })
+viewsRouter.get('/realtimeproducts', async (req, res) => {
+    const prodList = await productManager.getProducts()
+    res.render('realTimeProducts', { title: 'Productos en Tiempo Real', name: 'Usuario de Prueba', prodList })
 })
 
-module.exports = router
+module.exports = viewsRouter
