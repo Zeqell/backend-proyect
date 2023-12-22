@@ -3,7 +3,7 @@ const handlebars = require ('express-handlebars')
 const productsRouter = require('./routes/apis/products.router.js')
 const cartsRuter = require('./routes/apis/carts.router.js')
 const viewsRouter = require('./routes/views.router.js')
-const ProductManagerFile = require('./managers/productsManagerFile.js')
+const ProductManagerFile = require('./daos/file/productsManagerFile.js')
 const { Server } = require('socket.io') 
 
 

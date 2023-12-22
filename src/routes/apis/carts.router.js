@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const CartsManager = require('../../managers/cartsManager.js')
+const CartsManager = require('../../daos/file/cartsManager.js')
 
 const cartsRouter = Router()
 const cartsManager = new CartsManager('../../mockDB/carts.json')
