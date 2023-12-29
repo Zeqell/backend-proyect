@@ -1,52 +1,56 @@
-const socket = io()
-socket.on('connect', () => {
-    console.log('Conexión establecida con el servidor de Socket.io')
-})
+d = document;
+//Front Real Time Product
+const socket = io();
 
-// Actualización del listado de productos.
-socket.on('updateProducts', (products) => {
-    try {
-        const productTableBody = document.getElementById('productTableBody')
-        console.log(products)
-        productTableBody.innerHTML = '' // Limpiamos la tabla antes de actualizar.
+const divSwiper = d.querySelector('#swiper');
+const formRTP = d.querySelector('#formRTP');
+formRTP.addEventListener('submit', (event) => {
+    event.preventDefault();
 
-        products.forEach((product) => {
-            const row = document.createElement('tr')
-            row.innerHTML = `
-            <td>${product.code}</td>
-            <td>${product.title}</td>
-            <td>${product.description}</td>
-            <td>$${product.price}</td>
-            <td>${product.stock}</td>
-            <td>
-                <button class="uk-icon-button" uk-icon="trash" onclick="deleteProduct(${product.id})"></button>
-            </td>
-            `
-            productTableBody.appendChild(row)
-        })
-    } catch (error) {
-        console.error('Error al procesar productos:', error)
-    }
-})
+    // Producto armado
+    const prd = {
+        title: d.querySelector('#frtitle').value,
+        description: '...',
+        code: d.querySelector('#frcode').value,
+        price: d.querySelector('#frprice').value,
+        stock: d.querySelector('#frstock').value,
+        status: true,
+        category: d.querySelector('#frcat').value,
+        thumbnail: d.querySelector('#frimage').value,
+    };
 
-// Función para agregar un nuevo producto.
-function addProduct() {
-    const form = document.getElementById('addProductForm')
-    const code = form.elements.code.value
-    const title = form.elements.title.value
-    const description = form.elements.description.value
-    const price = form.elements.price.value
-    const stock = form.elements.stock.value
-    const thumbnail = 'https://hligco.com/wp-content/plugins/builder-mosaic/assets/images/image-placeholder.jpg'
+    // envia WebSocket (el prod armado)
+    socket.emit('nuevoProducto', prd);
 
-    // Enviamos el evento al servidor.
-    socket.emit('addProduct', { code, title, description, price, stock, thumbnail })
+    // escucha WebSocket
+    escuchar();
+});
 
-    form.reset() // Limpiamos el formulario después de enviar el nuevo producto.
+function deletePrd(code) {
+    socket.emit('eliminarProducto', code);
+    escuchar();
 }
 
-// Eliminación de producto.
-function deleteProduct(productId) {
-    // Enviamos el evento al servidor.
-    socket.emit('deleteProduct', productId)
+function escuchar() {
+    socket.on('productos', (listProduct) => {
+        let armandoHtml = '';
+        listProduct.forEach((prd) => {
+            armandoHtml += `<div class="swiper-slide">
+        <img src=${prd.thumbnail}>
+        <p class="sw-title">${prd.title}</p>
+        <p class="sw-price">Precio: $ ${prd.price}</p>
+        <p class="sw-code">Código: ${prd.code}</p>
+        <button onclick="deletePrd('${prd.code}')">Eliminar</button>
+        </div>`;
+        });
+        divSwiper.innerHTML = armandoHtml;
+
+        // regenera carrusel
+        swiper = new Swiper('.swiper-container', {
+            slidesPerView: 5,
+            pagination: {
+                el: '.swiper-pagination',
+            },
+        });
+    });
 }
