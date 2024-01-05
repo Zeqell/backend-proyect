@@ -4,6 +4,13 @@ const socket = io();
 
 const divSwiper = d.querySelector('#swiper');
 const formRTP = d.querySelector('#formRTP');
+
+var swiper = new Swiper('.swiper-container', {
+    slidesPerView: 5,
+    pagination: {
+        el: ".swiper-pagination",
+    },
+});
 formRTP.addEventListener('submit', (event) => {
     event.preventDefault();
 

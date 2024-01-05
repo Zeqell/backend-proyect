@@ -1,21 +1,13 @@
-/// ________________________________ Products_____________
-
-GET http://localhost:8080/api/products
 
 ###
-GET http://localhost:8080/api/products/6
-###
-post http://localhost:8080/api/products
-###
-put http://localhost:8080/api/products/1
-###
-delete http://localhost:8080/api/products/100
+GET http://localhost:8080/api/carts
 
-/// ________________________________ Carts_____________
-
-GET http://localhost:8080/api/carts/1
-
-###
+### 
 POST http://localhost:8080/api/carts
+
 ###
-POST http://localhost:8080/api/carts/1/product/1
+POST http://localhost:8080/api/carts/659745571bd213c4f84e57ab
+
+
+### 
+DELETE http://localhost:8080/api/carts/659745571bd213c4f84e57ab

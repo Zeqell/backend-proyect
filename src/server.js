@@ -1,73 +1,34 @@
-const express = require ('express')
-const handlebars = require ('express-handlebars')
-const productsRouter = require('./routes/apis/products.router.js')
-const cartsRuter = require('./routes/apis/carts.router.js')
-const viewsRouter = require('./routes/views.router.js')
-const ProductManagerFile = require('./daos/file/productsManagerFile.js')
-const { Server } = require('socket.io') 
+const express = require('express');
+const { createServer } = require('node:http');
+const serverIo = require('./routes/serverIo.js');
+const { connectDB } = require('./config/index.js');
 
+const handlebars = require('express-handlebars');
+const { viewsRouter } = require('./routes/views.router.js');
+const appRouter = require('./routes');
 
-const app = express()
-const httpServer = require('http').Server(app)
-const io = new Server(httpServer)
-const productManager = new ProductManagerFile('./mockDB/products.json')
-const PORT = 8080
+const port = 8080;
+const app = express();
+const server = createServer(app)
+serverIo(server)
 
-app.use(express.json())
-app.use(express.urlencoded({extended:true}))
-app.use(express.static(__dirname+'/public'))
+connectDB()
 
-app.engine('hbs', handlebars.engine({
-    extname: '.hbs'
-}))
-app.set('view engine', 'hbs')
-app.set('views', __dirname + '/views')
+// configuraciones de la App
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(__dirname + '/public'));
 
-// localhost:8080  /api
-app.use('/api/products', productsRouter)
-app.use('/api/carts', cartsRuter)
-app.use('/views', viewsRouter)
+// motor de plantilla
+app.engine('hbs', handlebars.engine({ extname: '.hbs' }));
+app.set('view engine', 'hbs');
+app.set('views', __dirname + '/views');
 
-app.use((err, req, res, next) => {
-    console.error(err.stack)
-    res.status(500).send('Error del servidor')
-})
+// definiendo vistas
+app.use('/', viewsRouter);
+app.use(appRouter)
 
-
-// Conectamos Socket.io.
-io.on('connection', (socket) => {
-    console.log('Cliente conectado')
-
-    // agregar nuevos productos.
-    socket.on('addProduct', async (productData) => {
-        try {
-            await productManager.addProduct(productData)
-
-            // actualización a todos los clientes conectados.
-            const updatedProducts = await productManager.getProducts()
-            io.emit('updateProducts', updatedProducts)
-        } catch (error) {
-            console.error(error)
-        }
-    })
-
-    socket.on('deleteProduct', async (productId) => {
-        try {
-            await productManager.deleteProduct(productId)
-
-            // actualización a todos los clientes conectados.
-            const updatedProducts = await productManager.getProducts()
-            io.emit('updateProducts', updatedProducts)
-        } catch (error) {
-            console.error(error)
-        }
-    })
-
-    socket.on('disconnect', () => {
-        console.log('Cliente desconectado')
-    })
-})
-
-httpServer.listen(PORT, () => {
-    console.log(`Servidor escuchando en el puerto ${PORT}`)
-})
+// Confirmacion de inicio
+server.listen(port, () => {
+    console.log(`Server andando en port ${port}`);
+});

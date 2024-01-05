@@ -22,7 +22,7 @@ class MessageDaoMongo {
         try {
             return await this.model.deleteMany({})
         } catch (error) {
-            this.model = messageModel;
+            console.log(error);
         }
     }
 }
