@@ -1,15 +1,32 @@
-<section class="section_account">
-    <h1>Login</h1>
+<main>
+    <div class="loginContainer">
+        <h3>LOG IN</h3>
+        <div class="horizontalBar">
+            <p></p>
+            {{!-- <form action="/api/sessions/login" method="post" id="loginForm"> --}}
+                <form id="loginForm">
+                    <div class="formContainer">
+                        <label for="email">Username (email)</label>
+                        <input type="email" placeholder="Enter Username" value="email@prueba.com" name="email"
+                            autocomplete="email" id="loginemail" required>
 
-    <form action="/api/session/login" method="POST" class="form-group">
-        <input type="email" name="email" placeholder="Email">
-        <input type="password" name="password" placeholder="Password">
-        <button class="btn btn-primary" type="submit">Login</button>
-    </form>
-    <br>
-    <a href="/api/session/github" class="btn btn-dark"><i class="fa-brands fa-github"></i></a>
-    <br>
-        <a><strong>Si no tienes una cuenta</strong></a>
+                        <label for="password">Password</label>
+                        <input type="password" placeholder="Enter Password" value="123456" name="password"
+                            id="loginpassword" required>
+
+                        <button type="submit">Login</button>
+                        {{!-- <label>
+                            <input type="checkbox" checked="checked" name="remember"> Remember me
+                        </label> --}}
+                    </div>
+                </form>
+                <a class="aLogIn" href="/api/sessions/github">GitHub <i class='bx bxl-github'></i></a>
+                <p></p>
+        </div>
+        <p class="" id="answer">{{answer}}</p>
         <br>
-        <a href="/register" class="link-signup"><button class="btn btn-primary" type="submit">Inscribirse</button></a>
-</section>
+        <a class="link" href="/register">Registrarse</a>
+    </div>
+</main>
+
+<script src="../public/js/login.js"></script>

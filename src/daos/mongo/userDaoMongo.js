@@ -1,29 +1,23 @@
-const { userModel } = require("./models/user.model.js");
+const CartMongo = require('./cartsDaoMongo.js')
+const usersModel = require('./models/user.model.js')
+
+const carts = new CartMongo();
 
 class userDaoMongo {
-    constructor(){
-        this.userModel = userModel
+    constructor() {
+        this.model = usersModel;
     }
+    getUsersPaginate = async (limit = 10, page = 1) => await thism.model.paginate({}, { limit, page, lean: true })
 
-    async getUsers() {
-        return await this.userModel.find({})
+    getUsers = async () => await this.model.find({})
+    getUserById = async (uid) => await this.model.findOne({ _id: uid })
+    getUserByMail = async (uemail) => await this.model.findOne({ email: uemail })
+    createUser = async (newUser) => {
+        newUser.cart = await carts.create();
+        await this.model.create(newUser)
     }
-
-    async getUserBy(filter) {
-        return await this.userModel.findOne(filter)
-    }
-
-    async createUser(newUser) {
-        return await this.userModel.create(newUser)
-    }
-
-    async updateUser(uid, userUpdate) {
-        return await this.userModel.findOneAndUpdate({_id: uid}, userUpdate)
-    }
-
-    async deleteUser(uid) {
-        return await this.userModel.findOneAndDelete({_id: uid})
-    }
+    updateUser = async (uid, userUpdate) => await this.model.findOneAndUpdate({ _id: uid }, userUpdate)
+    deleteUser = async (uid) => await this.model.findOneAndDelete({ _id: uid })
 }
 
-module.exports = userDaoMongo
+module.exports = userDaoMongo;

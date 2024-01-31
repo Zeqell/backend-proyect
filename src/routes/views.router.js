@@ -1,162 +1,140 @@
-const { Router } = require('express');
-const { ProductMongo } = require('../daos/mongo/productsDaoMongo.js');
+const configObject = require('../config/index.js')
+const { Router } = require('express')
+const { productClass } = require('../daos/index.js')
+
+const handleResponses = require('../middleware/handleResp.js')
+const { handleAuthFront } = require('../middleware/handlePasp.js')
+const  {renderPage}  = require('../helpers/responses.js')
+
 const router = Router();
 
-const productsMongo = new ProductMongo();
-
-router.get('/', async (req, res) => {
-    res.redirect("/products");
-})
-
-router.get('/products', async (req, res) => {
-    // handle fetching products
-    const { page = 1, sort, category, availability } = req.query;
-    let others = '';
-    if (sort) others += '&sort=' + sort;
-    if (category) others += '&category=' + category;
-    if (availability) others += '&availability=' + availability;
-
-    let resp = await fetch(
-        `http://localhost:8080/api/products?page=${page}&limit=5${others}`,
-    );
-    resp = await resp.json();
-
-    // inform error
-    let productError = false;
-    let pageError = false;
-    if (resp.status === 'error') {
-        productError = true;
+// * GET http://localhost:PORT/ (login)
+const productsMongo = new productClass();
+router.get("/", handleAuthFront(['PUBLIC']), handleResponses, (req, res) => {
+    try {
+        if (req.user) return res.redirect('/products')
+        res.renderPage("login", "Login");
+    } catch (error) {
+        console.error(error);
+        res.renderPage("error", "Error", { message: "Ocurrio un error, vuelva a intentarlo" });
     }
-    // update product
-    let product;
-    if (!productError) {
-        product = await resp.payload;
-        product.forEach((prd) => {
-            prd.price = new Intl.NumberFormat('es-ES', { style: 'decimal' }).format(
-                prd.price,
-            );
-            prd['unavailability'] = prd.stock == 0;
-            prd['link'] = `/products/${prd._id}`;
+});
+
+// * GET http://localhost:PORT/register
+router.get("/register", handleAuthFront(['PUBLIC']), handleResponses, (req, res) => {
+    try {
+        if (req.user) return res.redirect('/products')
+        res.renderPage("register", "Nuevo Registro");
+    } catch (error) {
+        console.error(error);
+        res.renderPage("error", "Error", { message: "Ocurrio un error, vuelva a intentarlo" });
+    }
+});
+
+// * GET http://localhost:PORT/products
+router.get("/products", handleAuthFront(['PUBLIC']), handleResponses, async (req, res) => {
+    try {
+        // handle url API products
+        const {
+            page = 1,
+            sort,
+            category: initialCategory,
+            availability = true,
+        } = req.query;
+        const category = initialCategory === "all" ? null : initialCategory;
+        const apiUrl = new URL(`http://localhost:${configObject.port}/api/products`);
+        apiUrl.searchParams.set("page", page);
+        apiUrl.searchParams.set("limit", "5");
+        if (sort) apiUrl.searchParams.set("sort", sort);
+        if (category) apiUrl.searchParams.set("category", category);
+        if (availability) apiUrl.searchParams.set("availability", availability);
+
+        const data = await (await fetch(apiUrl)).json();
+
+        if (
+            data.error ||
+            Number(page) > Number(data.data.totalPages) ||
+            Number(page) < 0
+        ) {
+            return res.renderPage("products", "Productos", { productError: true });
+        }
+
+        // update product
+        const product = data.data.docs.map((prd) => ({
+            ...prd,
+            price: prd.price.toLocaleString("es-ES", { style: "decimal" }),
+            unavailability: prd.stock === 0,
+            link: `/products/${prd._id}`,
+        }));
+
+        const filterUrl = (filter) => {
+            const params = new URLSearchParams(req.url.split("?")[1] || "");
+            params.delete(filter);
+            params.delete("page");
+            return `/products?${params}`;
+        };
+
+        res.renderPageEstruc("products", "Producctos",{
+            control: {
+                productError: false,
+            },
+            arrays: {
+                product,
+                category: await productsMongo.getCategorys(),
+            },
+            pageControl: {
+                page: data.data.page,
+                totalPages: data.data.totalPages,
+                hasPrevPage: data.data.hasPrevPage,
+                hasNextPage: data.data.hasNextPage,
+                prevLink: filterUrl("page") + data.data.prevLink,
+                nextLink: filterUrl("page") + data.data.nextLink,
+                ascend: filterUrl("sort") + "&sort=asc",
+                descend: filterUrl("sort") + "&sort=desc",
+                disorderly: filterUrl("sort") + "&sort=disorderly",
+                availability: filterUrl("availability") + "&availability=false",
+                unavailability: filterUrl("availability") + "&availability=true",
+                url: filterUrl("category"),
+            },
         });
+    } catch (error) {
+        console.error(error);
+        res.renderPage("error", "Error", { message: "Ocurrio un error, vuelva a intentarlo" });
     }
-    // update url and security
-    let workingUrl = req.url.split('?')[1];
-    let arrayString;
+});
 
-    if (workingUrl) {
-        arrayString = workingUrl.split('&');
+// * GET http://localhost:PORT/products/:id
+router.get("/products/:pid", handleAuthFront(['PUBLIC']), handleResponses, async (req, res) => {
+    try {
+        const { pid } = req.params;
+        const apiUrl = `http://localhost:${configObject.port}/api/products/${pid}`;
 
-        let secPage = arrayString.findIndex((elm) => elm.split('=')[0] == 'page');
-        if (secPage != -1) {
-            secPage = arrayString[secPage].split('=')[1]
-            if (secPage > resp.totalPages || secPage < 0) {
-                pageError = true;
+        const { error, data } = await (await fetch(apiUrl)).json();
+
+        res.renderPageEstruc("product", "Producto",
+            {
+                control: {
+                    productError: error,
+                },
+                arrays: {
+                    product: data,
+                },
             }
-        }
-    }
-
-    function filterUrl(array, filter) {
-        if (!workingUrl) return '/products?';
-        //let array = string.split('&');
-        array = array.filter((elm) => elm.split('=')[0] != filter);
-        array = array.filter((elm) => elm.split('=')[0] != 'page');
-        if (array.length === 0) {
-            finalText = '/products?';
-        } else {
-            finalText = '/products?' + array.join('&') + '&';
-        }
-        return finalText;
-    }
-    const url = filterUrl(arrayString, 'category');
-
-    res.render('products', {
-        title: 'Inicio',
-        pageError,
-        productError,
-        product,
-        page: resp.page,
-        totalPages: resp.totalPages,
-        hasPrevPage: resp.hasPrevPage,
-        hasNextPage: resp.hasNextPage,
-        prevLink: `${filterUrl(arrayString, 'x')}${resp.prevLink}`,
-        nextLink: `${filterUrl(arrayString, 'x')}${resp.nextLink}`,
-        category: await productsMongo.getCategorys(),
-        ascend: `${filterUrl(arrayString, 'sort')}sort=asc`,
-        descend: `${filterUrl(arrayString, 'sort')}sort=desc`,
-        disorderly: `${filterUrl(arrayString, 'sort')}sort=disorderly`,
-        availability: `${filterUrl(arrayString, 'availability')}availability=false`,
-        unavailability: `${filterUrl(arrayString, 'availability')}availability=true`,
-        url,
-    });
-});
-
-router.get('/products/:pid', async (req, res) => {
-    const objectRender = { title: 'Producto' }
-    const pid = req.params.pid;
-
-    let resp = await fetch(`http://localhost:8080/api/products/${pid}`);
-    resp = await resp.json();
-
-    const product = resp.payload;
-
-    if (resp.status == "ok") {
-        objectRender['productError'] = false
-        objectRender['product'] = product
-        objectRender['cart'] = `6591b1a1419b33fbcb57e2b1`
-    } else {
-        objectRender['productError'] = true
-    }
-    //console.log(objectRender);
-    res.render('product', objectRender)
-})
-
-router.get('/cart', async (req, res) => {
-    const objectRender = { title: 'Carrito' }
-    let resp = await await fetch(
-        `http://localhost:8080/api/carts/6591b1a1419b33fbcb57e2b1`,
-    );
-    resp = await resp.json();
-    const cart = resp.payload;
-    const products = cart.products;
-    products.forEach(prd => {
-        prd['total'] = prd.product.price * prd.quantity;
-    })
-
-    if (resp.status == "ok") {
-        objectRender['cartError'] = false;
-        objectRender['cartId'] = cart._id;
-
-        if (products.length != 0) {
-            objectRender['cartNoEmpty'] = true;
-            objectRender['products'] = products;
-        }
-
-    } else {
-        objectRender['cartError'] = true
-    }
-
-    res.render('cart', objectRender)
-})
-
-router.get('/realTimeProducts', async (req, res) => {
-    let resp = await fetch(`http://localhost:8080/api/products?limit=100`);
-    resp = await resp.json();
-    const product = resp.payload;
-
-    product.forEach((prd) => {
-        prd.price = new Intl.NumberFormat('es-ES', { style: 'decimal' }).format(
-            prd.price,
         );
-    });
-    res.render('realTimeProducts', {
-        title: 'Productos en tiempo Real',
-        product,
-        cssPlus: `https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css`,
-    });
+
+    } catch (error) {
+        console.error(error);
+        res.renderPage("error", "Error", { message: "Ocurrio un error, vuelva a intentarlo" });
+    }
 });
 
-router.get('/chat', async (req, res) => {
-    res.render('chat', {});
-});
+// ? GET http://localhost:PORT/cart // RE HACIENDO
+router.get("/cart", handleAuthFront(['USER', 'USER_PREMIUM']), handleResponses, (req, res) => res.renderPage("cart", "Carrito")); // RE HACIENDO
 
-exports.viewsRouter = router;
+// ? GET http://localhost:PORT/realTimeProducts // RE HACIENDO
+router.get("/realTimeProducts", handleAuthFront(['USER_PREMIUM']), handleResponses, (req, res) => res.renderPage("realTimeProducts", "Productos en tiempo real"));
+
+// ? GET http://localhost:PORT/chat // RE HACIENDO
+router.get("/chat", handleAuthFront(['USER', 'USER_PREMIUM']), handleResponses, (req, res) => res.renderPage("chat", "Chat")); // RE HACIENDO
+
+module.exports = router;

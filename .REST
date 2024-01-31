@@ -1,6 +1,6 @@
 
 ###
-GET http://localhost:8080/api/carts
+GET http://localhost:8080/api/products
 
 ### 
 POST http://localhost:8080/api/carts

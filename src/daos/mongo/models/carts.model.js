@@ -16,8 +16,5 @@ const cartSchema = new Schema({
     atCreated: { type: Date, default: Date() },
 });
 
-/*cartSchema.pre('findOne', function () {
-  this.populate('products.product');
-});*/
 
 exports.cartModel = model('carts', cartSchema);

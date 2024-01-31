@@ -1,9 +1,9 @@
-const { ObjectId } = require('bson');
-const { cartModel } = require('./models/carts.model.js');
-const { ProductMongo } = require('./productsDaoMongo.js');
-const products = new ProductMongo();
+const cartModel = require('./models/carts.model.js')
+const productMongo = require('./productsDaoMongo.js') 
 
-class CartDaoMongo {
+const products = new productMongo();
+
+class cartDaoMongo {
     constructor() {
         this.model = cartModel;
     }
@@ -44,7 +44,6 @@ class CartDaoMongo {
             }
             return cart;
         } catch (error) {
-            //console.error(error);
             return 'Ocurrio un error al buscar el carrito';
         }
     }
@@ -69,12 +68,10 @@ class CartDaoMongo {
                 });
             }
             await cart.save()
-            /*cart.products.push({product: productId})
-            await this.model.updateOne({_id: cid}, cart)*/
+
             return await this.model.findOne({ _id: cid })
 
         } catch (error) {
-            //console.error(error);
             return 'Ocurrio un error al agregar el producto';
         }
     }
@@ -100,7 +97,6 @@ class CartDaoMongo {
             );
             return await this.getCarts(cid);
         } catch (error) {
-            //console.error(error);
             return 'Ocurrio un error al tratar de eliminar el producto';
         }
     }
@@ -118,7 +114,6 @@ class CartDaoMongo {
 
             return await this.model.findOne({ _id: cid })
         } catch (error) {
-            //console.error(error);
             return 'Ha ocurrido un error';
         }
     }
@@ -163,4 +158,4 @@ class CartDaoMongo {
     }
 }
 
-exports.CartMongo = CartDaoMongo;
+module.exports = cartDaoMongo;

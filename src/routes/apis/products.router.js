@@ -1,187 +1,236 @@
-const { Router } = require('express');
-const { ProductMongo } = require('../../daos/mongo/productsDaoMongo');
+const { Router } = require('express') 
+const { productClass } = require('../../daos/index.js')
+const { resCatchError, resError, resJson } = require('../../helpers/responses.js')
+const CustomError = require('../../util/err.js') 
 
 const router = Router();
+const products = new productClass();
 
-const products = new ProductMongo();
+// GET http://localhost:PORT/api/products + ? limit, page, sort, query
+router.get("/", async (req, res) => {
+    try {
+        let {
+            limit = 10,
+            page = 1,
+            category,
+            availability,
+            sort,
+            campo1,
+            filtro1,
+            campo2,
+            filtro2,
+            campo3,
+            filtro3,
+        } = req.query;
 
-// GET http://localhost:8080/api/products + ? limit, page, sort, query
-router.get('/', async (req, res) => {
-    let {
-        limit = 10,
-        page,
-        category,
-        availability = true,
-        sort,
-        campo1,
-        filtro1,
-        campo2,
-        filtro2,
-        campo3,
-        filtro3,
-    } = req.query;
-    availability = availability == true || availability == 'true'
+        const query = {
+            ...(category && { category }),
+            ...(availability == "true" && { availability: true }),
+        };
+        const options = {
+            limit,
+            page,
+            ...(sort && { sort }),
+        };
 
-    const filters = {
-        limit,
-        page: page || 1,
-        query: {},
-    };
+        if (campo1 && filtro1) query[campo1] = filtro1;
+        if (campo2 && filtro2) query[campo2] = filtro2;
+        if (campo3 && filtro3) query[campo3] = filtro3;
 
-    if (category) {
-        filters.category = category;
-    }
-    if (availability) {
-        filters.availability = availability;
-    }
-    if (sort) {
-        filters.sort = sort;
-    }
-    if (campo1 && filtro1) {
-        filters.query[campo1] = filtro1;
-    }
-    if (campo2 && filtro2) {
-        filters.query[campo2] = filtro2;
-    }
-    if (campo3 && filtro3) {
-        filters.query[campo3] = filtro3;
-    }
-    const resp = await products.getProducts(filters);
+        const resp = await products.getProducts(query, options);
 
-    let prevLink = resp.prevPage ? `page=${resp.prevPage}` : '';
-    let nextLink = resp.nextPage ? `page=${resp.nextPage}` : '';
+        const { prevPage, nextPage } = resp;
+        const prevLink = prevPage ? `&page=${prevPage}` : "";
+        const nextLink = nextPage ? `&page=${nextPage}` : "";
 
-    if (typeof resp === 'string') {
-        res.status(400).json({
-            status: 'error',
-            payload: resp,
-        });
-    } else {
-        res.status(200).json({
-            status: 'success',
-            payload: resp.docs,
-            totalPages: resp.totalPages,
-            prevPage: resp.prevPage,
-            nextPage: resp.nextPage,
-            page: resp.page,
-            hasPrevPage: resp.hasPrevPage,
-            hasNextPage: resp.hasNextPage,
+        resJson(res, 200, {
+            ...resp,
             prevLink: prevLink,
             nextLink: nextLink,
         });
+    } catch (error) {
+        console.log(error);
+        if (error instanceof CustomError) {
+            resCatchError(res, error);
+        } else {
+            resError(
+                res,
+                "An error occurred in the API request",
+                500,
+                "GET http://localhost:PORT/api/products",
+            );
+        }
     }
 });
 
-// GET http://localhost:8080/api/products/:pid
-router.get('/:pid', async (req, res) => {
-    const pid = req.params.pid;
+// GET http://localhost:PORT/api/products/:pid
+router.get("/:pid", async (req, res) => {
+    try {
+        const { pid } = req.params;
+        const product = await products.getProductsById(pid);
 
-    const getProducts = await products.getProductsById(pid);
-
-    if (typeof getProducts === 'string') {
-        res.status(404).json({
-            status: 'fail',
-            payload: getProducts,
-        });
-    } else {
-        res.status(200).json({
-            status: 'ok',
-            payload: getProducts,
-        });
+        if (product) {
+            resJson(res, 200, product);
+        } else {
+            resError(
+                res,
+                "Product not found",
+                404,
+                "GET http://localhost:PORT/api/products/:pid",
+            );
+        }
+    } catch (error) {
+        console.error(error);
+        resError(
+            res,
+            "Internal Server Error",
+            500,
+            "GET http://localhost:PORT/api/products/:pid",
+        );
     }
 });
 
-// POST http://localhost:8080/api/products/ + body: whole product
-router.post('/', async (req, res) => {
+// POST http://localhost:PORT/api/products/ + body: whole product
+router.post("/", async (req, res) => {
     const newProduct = req.body;
 
-    const resp = await products.addProduct(newProduct);
-
-    if (typeof resp === 'string') {
-        res.status(400).json({
-            status: 'fail',
-            payload: resp,
-        });
-    } else {
-        res.status(200).json({
-            status: 'ok',
-            payload: resp,
-        });
+    try {
+        const resp = await products.addProduct(newProduct);
+        resJson(res, 200, resp);
+    } catch (error) {
+        console.error(error);
+        if (error instanceof CustomError) {
+            resCatchError(res, error);
+        } else {
+            console.error(error);
+            resError(
+                res,
+                "Internal Server Error",
+                500,
+                "GET http://localhost:PORT/api/products/:pid",
+            );
+        }
     }
 });
 
-// PUT http://localhost:8080/api/products/:pid + body: whole product
-router.put('/:pid', async (req, res) => {
-    const pid = req.params.pid;
-    const changedProduct = req.body;
+// PUT http://localhost:PORT/api/products/:pid + body: whole product
+router.put("/:pid", async (req, res) => {
+    try {
+        const pid = req.params.pid;
+        const changedProduct = req.body;
 
-    const resp = await products.updateProduct(pid, changedProduct);
+        const resp = await products.updateProduct(pid, changedProduct);
 
-    if (typeof resp === 'string') {
-        res.status(400).json({
-            status: 'fail',
-            payload: resp,
-        });
-    } else {
-        res.status(200).json({
-            status: 'ok',
-            payload: resp,
-        });
+        if (resp) {
+            resJson(res, 200, resp);
+        } else {
+            resError(
+                res,
+                "Code not found",
+                204,
+                "PUT http://localhost:PORT/api/products/:pid",
+                false,
+            );
+        }
+    } catch (error) {
+        console.error(error);
+        if (error instanceof CustomError) {
+            resCatchError(res, error);
+        } else {
+            resError(
+                res,
+                "Internal Server Error",
+                500,
+                "PUT http://localhost:PORT/api/products/:pid",
+            );
+        }
     }
 });
 
-// DELETE http://localhost:8080/api/products/:pid
-router.delete('/:pid', async (req, res) => {
-    const pid = req.params.pid;
+// DELETE http://localhost:PORT/api/products/:pid
+router.delete("/:pid", async (req, res) => {
+    try {
+        const pid = req.params.pid;
 
-    const resp = await products.deleteProductById(pid);
+        const resp = await products.deleteProductById(pid);
 
-    if (typeof resp === 'string') {
-        res.status(400).json({
-            status: 'fail',
-            payload: resp,
-        });
-    } else {
-        res.status(200).json({
-            status: 'ok',
-            payload: resp,
-        });
+        if (resp) {
+            resJson(res, 200, resp);
+        } else {
+            resError(
+                res,
+                "Id not found",
+                204,
+                "DELETE http://localhost:PORT/api/products/:pid",
+                false,
+            );
+        }
+    } catch (error) {
+        console.error(error);
+        if (error instanceof CustomError) {
+            resCatchError(res, error);
+        } else {
+            resError(
+                res,
+                "Internal Server Error",
+                500,
+                "DELETE http://localhost:PORT/api/products/:pid",
+            );
+        }
     }
 });
 
-// DELETE http://localhost:8080/api/products?code=x
-router.delete('/', async (req, res) => {
-    const pcode = req.query.code;
+// DELETE http://localhost:PORT/api/products?code=x
+router.delete("/", async (req, res) => {
+    try {
+        const pcode = req.query.code;
 
-    const resp = await products.deleteProductByCode(pcode);
+        const resp = await products.deleteProductByCode(pcode);
 
-    if (typeof resp === 'string') {
-        res.status(400).json({
-            status: 'fail',
-            payload: resp,
-        });
-    } else {
-        res.status(200).json({
-            status: 'ok',
-            payload: resp,
-        });
+        if (resp) {
+            resJson(res, 200, resp);
+        } else {
+            resError(
+                res,
+                "Code not found",
+                204,
+                "DELETE http://localhost:PORT/api/products/:pid",
+                false,
+            );
+        }
+    } catch (error) {
+        console.error(error);
+        if (error instanceof CustomError) {
+            resCatchError(res, error);
+        } else {
+            resError(
+                res,
+                "Internal Server Error",
+                500,
+                "DELETE http://localhost:PORT/api/products/:pid",
+            );
+        }
     }
 });
 
-// GET http://localhost:8080/api/products/categorys
-router.get('/group/categorys', async (req, res) => {
-    const resp = await products.getCategorys();
-
-    if (typeof resp === 'string') {
-        res.status(400).json({
-            status: 'fail',
-            payload: resp,
-        });
-    } else {
-        res.status(200).json({
-            status: 'ok',
-            payload: resp,
-        });
+// GET http://localhost:PORT/api/products/group/categorys
+router.get("/group/categorys", async (req, res) => {
+    try {
+        const resp = await products.getCategorys();
+        resJson(res, 200, resp);
+    } catch (error) {
+        console.error(error);
+        if (error instanceof CustomError) {
+            resCatchError(res, error);
+        } else {
+            resError(
+                res,
+                "An error occurred in the API request",
+                500,
+                "GET http://localhost:PORT/api/products",
+            );
+        }
     }
 });
-exports.productsRouter = router;
+
+module.exports = router;

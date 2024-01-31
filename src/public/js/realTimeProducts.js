@@ -1,9 +1,10 @@
 d = document;
-//Front Real Time Product
+
 const socket = io();
 
 const divSwiper = d.querySelector('#swiper');
 const formRTP = d.querySelector('#formRTP');
+const errorAlerts = d.querySelector('#errorAlerts');
 
 var swiper = new Swiper('.swiper-container', {
     slidesPerView: 5,
@@ -60,4 +61,11 @@ function escuchar() {
             },
         });
     });
+
+    socket.on('error', (message) => {
+        errorAlerts.innerHTML = message;
+        setTimeout(() => {
+            errorAlerts.innerHTML = '';
+        }, 5000)
+    })
 }

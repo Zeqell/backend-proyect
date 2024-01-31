@@ -1,6 +1,5 @@
 let validate = false;
 
-//Front Real Time Product
 const socket = io();
 
 const chatBox = document.querySelector('#chatBox');
@@ -19,7 +18,7 @@ chatBox.addEventListener('keyup', (e) => {
     }
 })
 
-// FIXME corregir el evento de cargado inicial
+//corregir el evento de cargado inicial
 chatBox.addEventListener('load', () => {
     socket.emit('init', "dato")
 })
@@ -77,7 +76,7 @@ function changeValidate(check) {
     }
 }
 
-// FIXME: coregir evento que deberia borrar mongo mensajes
+//coregir evento que deberia borrar mongo mensajes
 clearMessages.addEventListener('click', () => {
     fetch('http://localhost:8080/api/messages', { method: "DELETE" });
     messageLogs.innerHTML = '';
