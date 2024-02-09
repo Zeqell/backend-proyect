@@ -1,6 +1,6 @@
-const mongoose = require('mongoose')
+const { connect } = require('mongoose')
 const session = require('express-session')
-const mongoStore = require('mongoose')
+const MongoStore = require('connect-mongo')
 const dotenv = require('dotenv')
 const program = require('./comander.js')
 
@@ -23,14 +23,15 @@ const configObject = {
     development: opts.mode == 'development',
 
     connectDB: async () => {
-        await mongoose.connect(process.env.MONGO_URI);
-        console.log('Base de datos conectada');
+        // await mongoose.connect(process.env.MONGO_URI);
+        // console.log('Base de datos conectada');
+        MongoSingleton.getInstance();
     },
     //conexion Mongo Atlas session
     sessionAtlas: (app) => {
         app.use(
             session({
-                store: mongoStore.create({
+                store: MongoStore.create({
                     mongoUrl: process.env.MONGO_URI,
                     mongoOptions: {
 
@@ -43,6 +44,21 @@ const configObject = {
             })
         );
     },
+}
+class MongoSingleton {
+    static instance //
+    constructor() {
+        connect(process.env.MONGO_URI);
+    }
+
+    static getInstance() {
+        if (!this.instance) {
+            console.log('Conectado a Base de Datos');
+            return this.instance = new MongoSingleton();
+        }
+        console.log('Base de Datos ya conectada');
+        return this.instance;
+    }
 }
 module.exports = configObject
 

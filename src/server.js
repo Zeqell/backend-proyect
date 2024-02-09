@@ -2,7 +2,7 @@ const program = require ('./config/comander.js')
 const configObj = require ('./config/index.js') 
 const express = require ('express') 
 const {createServer} = require ('node:http') 
-
+const serverIO = require ('./helpers/serverOI.js')
 const cookieParser = require ('cookie-parser') 
 const appRouter = require ('./routes/index.js') 
 
@@ -23,11 +23,8 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname + '/public'));
 app.use(cookieParser(configObj.cookies_code))
 
-// serverIo(server);
+serverIO(server);
 configObj.connectDB();
-
-// session
-//sessionAtlas(app);
 
 // passport
 initializePassport()

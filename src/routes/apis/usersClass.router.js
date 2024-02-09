@@ -4,7 +4,7 @@ class UsersCRouter extends Router {
     init() {
         this.get('/', ['USER', 'ADMIN'], async (req, res) => {
             try {
-                const users = "users" // userModel.find()
+                const users = "users"
                 if (!users) return res.sendUserError("User not found")
                 res.sendSuccess(users)
             } catch (error) {

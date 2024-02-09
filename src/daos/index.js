@@ -1,7 +1,11 @@
-const productClass = require('./mongo/productsDaoMongo.js')
-const userClass = require('./mongo/userDaoMongo.js')
+const ProductClass = require('./mongo/productsDaoMongo.js')
+const UserClass = require('./mongo/userDaoMongo.js')
+const CartClass = require('./mongo/cartsDaoMongo.js')
+const MessageClass = require('./mongo/mesaggesDaoMongo.js')
 
 module.exports = {
-    productClass,
-    userClass
+    ProductClass,
+    UserClass,
+    CartClass,
+    MessageClass
 }

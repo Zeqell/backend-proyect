@@ -1,4 +1,4 @@
-const { messageModel } = require('./models/messages.model.js');
+const messageModel = require('./models/messages.model.js');
 
 class MessageDaoMongo {
     constructor() {

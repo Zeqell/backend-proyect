@@ -1,4 +1,4 @@
-const Router = require('../routerClass.js') 
+const Router = require('../routerClass.js')
 
 export default class UsersCRouter extends Router {
     init() {
