@@ -1,33 +1,35 @@
 <main>
-    <section class="productsContainer">
-        {{#if productError}}
-        <p>Se ha producido un error al momento de buscar el producto</p>
+    <header>
+        <h3 class="text-center">List of Products</h3>
+    </header>
+    {{#if user}}
+        {{#eq user.role 'admin'}}
+            <div class="welcome">
+                <p>Welcome Admin, enjoy shopping!</p>
+            </div>
         {{else}}
-        <h3>{{product.title}}</h3>
-        <p>SKU: {{product.code}}</p>
-
-        <div class="product">
-            <img src="{{product.thumbnail}}" alt="{{product.title}}">
-            <p>CATEGORIA: {{product.category}}</p>
-            <p>PRECIO: {{product.price}}</p>
-            <p>STOCK: {{product.stock}}</p>
-            <p>{{product.description}}</p>
-        </div>
-        <button onclick="addProduct('{{cart}}', '{{product._id}}')">Añadir producto al carrito</button>
-        <p id="addResponce"></p>
+            <div class="welcome">
+                <p>Welcome {{user.first_name}} {{user.last_name}} , enjoy shopping!</p>
+            </div>
+        {{/eq}}
+    {{/if}}
+    <div class="items-product">
+        <ul>
+            {{#each docs}}
+                <li>{{this.thumbnail}}</li>
+                <li>Title: {{this.title}}</li>
+                <a href="/products/details/{{this._id}}" class="btn btn-dark" style="margin: 5px">Details</a>
+                <hr>
+            {{/each}}
+        </ul>
+    </div>
+    <div class="text-center" style="margin-top: 20px">
+        {{#if hasPrevPage}}
+            <a href="/products?pageNumber={{prevPage}}" class="btn btn-dark" style="margin-right: 10px">Prev</a>
         {{/if}}
-    </section>
+        <span class="page-number" style="margin-right: 10px">{{page}}</span>
+        {{#if hasNextPage}}
+            <a href="/products?pageNumber={{nextPage}}" class="btn btn-dark">Next</a>
+        {{/if}}
+    </div>
 </main>
-
-<script>
-    async function addProduct(cid, pid) {
-        const text = document.querySelector('#addResponce');
-        let resp = await fetch(`/api/carts/${cid}/product/${pid}`, { method: 'POST' })
-        resp = await resp.json();
-        if (await resp.status == "ok") {
-            text.innerHTML = "Producto agregado correctamente"
-        } else {
-            text.innerHTML = "A ocurrido un error al agregar el producto"
-        }
-    }
-</script>

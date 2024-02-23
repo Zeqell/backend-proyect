@@ -6,4 +6,4 @@ program
     .option('--mode <mode>', 'Environment mode', 'production')
     .parse()
 
-module.exports = program
+module.exports = {program}

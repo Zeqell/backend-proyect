@@ -1,60 +1,47 @@
-const { MessageClass, ProductClass } = require('../daos/index.js') 
-const CustomError = require('../util/err.js') 
-const { Server } = require('socket.io') 
+const { Server } = require('socket.io')
+const MessageController = require('../controllers/messages.controller.js')
+const ProdcutsController = require('../controllers/products.controller.js')
 
-module.exports = function (server) {
 
-    const io = new Server(server)
+function configureSocketIO(serverHttp) {
 
-    const products = new ProductClass();
-    const messages = new MessageClass();
+    const io = new Server(serverHttp)
+    const productsController = new ProdcutsController()
+    const messageController = new MessageController()
 
-    io.on('connection', ios => {
-        //console.log("Nuevo cliente conectado");
+    io.on('connection', socket => {
+        console.log('New client connection')
 
-        //REAL TIME PRODUCT
-        ios.on('nuevoProducto', async newProduct => {
+        socket.on('newProduct', async addProduct => {
+            await productsController.addProduct(addProduct)
+            const productsList = await productsController.getProducts()
+            socket.emit('products', productsList)
+        })
+
+        socket.on('deleteProduct', async deleteProductById => {
+            await productsController.deleteProduct(deleteProductById)
+            const productsList = await productsController.getProducts()
+            console.log('Products sent:', productsList);
+            socket.emit('products', productsList)
+        })
+
+        socket.on('message', async (data) => {
+            console.log(`${data.user}: ${data.message}`)
+
             try {
-                await products.addProduct(newProduct);
-
-                let resp = await fetch(`http://localhost:8080/api/products?limit=100`);
-                resp = await resp.json()
-                const listProduct = resp.data.data;
-
-                io.emit('productos', listProduct)
-
-            } catch (error) {
-                let message = 'Error interno del servidor'
-                if (error instanceof CustomError) {
-                    message = error.message
+                const newMessage = {
+                    message: data.message,
+                    timestamp: new Date()
                 }
-                io.emit('error', message)
+
+                await messageController.addMessageToUser(data.user, newMessage)
+
+                io.emit('messageLogs', { user: data.user, message: newMessage })
+            } catch (error) {
+                console.error('Error saving message to database:', error)
             }
         })
-
-        ios.on('eliminarProducto', async code => {
-            await products.deleteProductByCode(code);
-
-            let resp = await fetch(`http://localhost:8080/api/products?limit=100`);
-            resp = await resp.json()
-            const listProduct = resp.data.data;
-
-            io.emit('productos', listProduct)
-        })
-
-        //CHAT
-        ios.on('message', async (data) => {
-            const newMessaegs = await messages.addMessage(data);
-            io.emit('messageLogs', newMessaegs)
-        })
-
-        ios.on('init', async () => {
-            ios.emit('messageLogs', newMessaegs)
-        })
-
-        ios.on('clean', async () => {
-            await messages.clearMessages()
-            io.emit('messageLogs', newMessaegs)
-        })
     })
+    return io
 }
+module.exports = configureSocketIO

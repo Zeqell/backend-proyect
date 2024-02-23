@@ -1,28 +1,25 @@
-<div>
-    <h1>Bienvenido {{name}}</h1>
-</div>
-<div>
-    <h2>Listado de Productos</h2>
-    <table class="uk-table uk-table-striped uk-table-hover">
-        <thead>
-            <tr>
-                <th>Código</th>
-                <th>Título</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Stock</th>
-            </tr>
-        </thead>
-        <tbody>
-            {{#each prodList}}
-                <tr>
-                    <td>{{this.code}}</td>
-                    <td>{{this.title}}</td>
-                    <td>{{this.description}}</td>
-                    <td>${{this.price}}</td>
-                    <td>{{this.stock}}</td>
-                </tr>
+
+<main>
+    <header>
+        <h3 class="text-center">You can find all products</h3>
+    </header>
+    <div class="items-product">
+        <ul>
+            {{#each docs}}
+            <li>Title: {{this.title}}</li>
+            <li>Price: ${{this.price}}</li>
+            <li>Stock: {{this.stock}}</li>
+            <hr>
             {{/each}}
-        </tbody>
-    </table>
-</div>
+        </ul>
+    </div>
+    <div class="text-center" style="margin-top: 20px">
+        {{#if hasPrevPage}}
+            <a href="/?pageNumber={{prevPage}}" class="btn btn-dark" style="margin-right: 10px">Prev</a>
+        {{/if}}
+        <span class="page-number" style="margin-right: 10px">{{page}}</span>
+        {{#if hasNextPage}}
+            <a href="/?pageNumber={{nextPage}}" class="btn btn-dark">Next</a>
+        {{/if}}
+    </div>
+</main>

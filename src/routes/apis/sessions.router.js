@@ -1,24 +1,37 @@
-const { Router } = require('express') 
-const passport = require('passport') 
+const { Router } = require('express')
+const passport = require('passport')
+const { passportCall } = require('../../helpers/jwt/passportCall.middleware.js')
+const { authorization } = require('../../helpers/jwt/authorization.middleware.js')
+const SessionController = require('../../controllers/sessions.controller.js')
+const { isAuthenticated } = require('../../middleware/handlePasp.js')
 
-const handleResponses = require('../../middleware/handleResp.js') 
-const { handleAuthFront } = require('../../middleware/handlePasp.js') 
-const SessionsController = require('../../controllers/sessions.controller.js') 
+const router = Router()
 
-const router = Router();
-const sControl = new SessionsController();
+const {
+    register,
+    login,
+    logout,
+    current,
+    github,
+    githubCallback
+} = new SessionController()
 
-// http://localhost:PORT/api/sessions/
-router.post('/register', sControl.register);
-router.post('/login', sControl.login);
-router.post('/loginSession', sControl.loginSession);
-router.get ('/logout', sControl.logout);
 
-// GITHUB API
-router.get('/github', passport.authenticate('github', {scope:['user:email']}), sControl.github)
-router.get('/githubcallback', passport.authenticate('github', {session: false, failureRedirect: '/'}), sControl.githubcallback)
+router.post('/register', register)
 
-// TODO Pruebas
-router.get('/current', handleAuthFront(['USER']), sControl.pruebasCurrent)
+router.post('/login', login)
 
-module.exports = router;
+router.get('/logout', logout)
+
+router.get('/current', [passportCall('jwt'), authorization(['ADMIN', 'PUBLIC'])], current)
+
+router.get('/github', passport.authenticate('github', {scope: ['user:email']}), github)
+
+router.get('/githubcallback', passport.authenticate('github', {failureRedirect: '/login'}), githubCallback)
+
+router.get('/protected-route', isAuthenticated, (req, res) => {
+    res.json({ message: 'Protected route' })
+})
+
+
+module.exports = router

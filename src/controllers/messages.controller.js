@@ -1,19 +1,46 @@
-const { MessageClass } = require ('../daos/index.js') 
+const { messageService } = require('../repositories/service.js')
 
+class messageController {
+    constructor(){
+        this.messageService = messageService
+    }
 
-class MessagesController {
-    constructor() {
-        this.service = new MessageClass
-    };
-
-    clearMessages = async (req, res) => {
+    async getAllMessages() {
         try {
-            await this.service.clearMessages();
-            res.sendSuccess({})
+            return await this.messageService.getAllMessages()
         } catch (error) {
-            res.sendCatchError(error)
+            console.error('Error getting messages:', error)
+            throw error
         }
     }
+
+    async getMessagesByUser(user) {
+        try {
+            return await this.messageService.getMessagesByUser(user)
+        } catch (error) {
+            console.error('Error getting messages by user:', error)
+            throw error
+        }
+    }
+
+    async addMessageToUser(user, message) {
+        try {
+            return await this.messageService.addMessageToUser(user, message)
+        } catch (error) {
+            console.error('Error adding message to user:', error)
+            throw error
+        }
+    }
+
+    async createUserWithMessage(user, message) {
+        try {
+            return await this.messageService.createUserWithMessage(user, message)
+        } catch (error) {
+            console.error('Error creating user with message:', error)
+            throw error
+        }
+    }
+
 }
 
-module.exports = MessagesController;
+module.exports = messageController

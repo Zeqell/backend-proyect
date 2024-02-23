@@ -1,5 +1,4 @@
 const { Schema, model } = require('mongoose')
-const mongososePaginate = require('mongoose-paginate-v2')
 
 const userSchema = new Schema({
     first_name: {
@@ -22,12 +21,15 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
+    cart: {
+        type: Schema.Types.ObjectId,
+        ref: 'Cart',
+    },
     role: {
         type: String,
         enum: ['admin', 'user'],
-        default: 'user'
+        required: true
     }
 })
 
-userSchema.plugin(mongososePaginate)
 exports.userModel = model('users', userSchema)

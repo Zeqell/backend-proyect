@@ -1,42 +1,58 @@
-const program = require ('./config/comander.js') 
-const configObj = require ('./config/index.js') 
-const express = require ('express') 
-const {createServer} = require ('node:http') 
-const serverIO = require ('./helpers/serverOI.js')
-const cookieParser = require ('cookie-parser') 
-const appRouter = require ('./routes/index.js') 
+const express = require('express')
+const session = require('express-session')
+const mongoStore = require('connect-mongo')
+const cors = require('cors')
+const { connectDb } = require('./config/index.js')
+const passport = require('passport')
+const { initializePassport } = require('./helpers/jwt/passport.config.js')
+const appRouter = require('./routes/index.js')
+const cookie = require('cookie-parser')
+const configureSocketIO = require('./helpers/serverOI.js')
+const handlebars = require('express-handlebars')
+const handlebarsHelpers = require('handlebars-helpers')()
+const eq = handlebarsHelpers.eq
 
-const handlebars = require ('express-handlebars') 
-const passport = require ('passport') 
-const initializePassport = require ('./config/passport.config.js') 
+const PORT = process.env.PORT
+const app = express()
 
-const {mode} = program.opts();
-console.log('Mode config: ' + mode);
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(express.static(__dirname + '/public'))
+app.use(cookie())
+app.use(cors())
+app.use(session({
+    store: mongoStore.create({
+        mongoUrl: process.env.MONGO_URI,
+        mongoOptions: {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        },
+        ttl: 15000000000,
+    }),
+    secret: 'secret',
+    resave: true,
+    saveUninitialized: true
+}))
+app.use(appRouter)
 
-const port = process.env.PORT;
-const app = express();
-const server = createServer(app);
-
-// configuraciones de la App
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(__dirname + '/public'));
-app.use(cookieParser(configObj.cookies_code))
-
-serverIO(server);
-configObj.connectDB();
-
-// passport
 initializePassport()
 app.use(passport.initialize())
 
-// handlebars
-app.engine('hbs', handlebars.engine({ extname: '.hbs' }));
-app.set('view engine', 'hbs');
-app.set('views', __dirname + '/views');
+app.engine('hbs', handlebars.engine({
+    extname: '.hbs',
+    helpers: {
+        eq: eq
+    }
+}))
+app.set('view engine', 'hbs')
+app.set('views', __dirname + '/views')
 
-app.use(appRouter);
+connectDb()
 
-server.listen(port, () => {
-    console.log(`Server andando en port ${port}`);
-});
+const serverHttp = app.listen(PORT, () => {
+    console.log(`Conectado en el puerto ${PORT}`)
+})
+
+const io = configureSocketIO(serverHttp)
+
+module.exports = { app, io }

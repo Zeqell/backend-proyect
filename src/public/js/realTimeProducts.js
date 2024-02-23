@@ -1,71 +1,67 @@
-d = document;
+const socket = io()
 
-const socket = io();
+socket.on('products', (data) => {
+    console.log('Received products:', data);
+    const productsList = document.getElementById('products')
+    productsList.innerHTML = ""
 
-const divSwiper = d.querySelector('#swiper');
-const formRTP = d.querySelector('#formRTP');
-const errorAlerts = d.querySelector('#errorAlerts');
-
-var swiper = new Swiper('.swiper-container', {
-    slidesPerView: 5,
-    pagination: {
-        el: ".swiper-pagination",
-    },
-});
-formRTP.addEventListener('submit', (event) => {
-    event.preventDefault();
-
-    // Producto armado
-    const prd = {
-        title: d.querySelector('#frtitle').value,
-        description: '...',
-        code: d.querySelector('#frcode').value,
-        price: d.querySelector('#frprice').value,
-        stock: d.querySelector('#frstock').value,
-        status: true,
-        category: d.querySelector('#frcat').value,
-        thumbnail: d.querySelector('#frimage').value,
-    };
-
-    // envia WebSocket (el prod armado)
-    socket.emit('nuevoProducto', prd);
-
-    // escucha WebSocket
-    escuchar();
-});
-
-function deletePrd(code) {
-    socket.emit('eliminarProducto', code);
-    escuchar();
-}
-
-function escuchar() {
-    socket.on('productos', (listProduct) => {
-        let armandoHtml = '';
-        listProduct.forEach((prd) => {
-            armandoHtml += `<div class="swiper-slide">
-        <img src=${prd.thumbnail}>
-        <p class="sw-title">${prd.title}</p>
-        <p class="sw-price">Precio: $ ${prd.price}</p>
-        <p class="sw-code">Código: ${prd.code}</p>
-        <button onclick="deletePrd('${prd.code}')">Eliminar</button>
-        </div>`;
-        });
-        divSwiper.innerHTML = armandoHtml;
-
-        // regenera carrusel
-        swiper = new Swiper('.swiper-container', {
-            slidesPerView: 5,
-            pagination: {
-                el: '.swiper-pagination',
-            },
-        });
-    });
-
-    socket.on('error', (message) => {
-        errorAlerts.innerHTML = message;
-        setTimeout(() => {
-            errorAlerts.innerHTML = '';
-        }, 5000)
+    data.forEach((product) => {
+        const listItem = document.createElement('li')
+        listItem.innerHTML = `
+      <strong>Title:</strong> ${product.title}<br>
+      <strong>Price:</strong> $${product.price}<br>
+      <strong>Stock:</strong> ${product.stock}<br>
+      <button onclick="removeProduct('${product._id}')">Remove</button>
+      <hr>
+    `
+        productsList.appendChild(listItem)
     })
+})
+
+const removeProduct = (id) => {
+    fetch(`/api/products/${id}`, {
+        method: 'DELETE'
+    })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error("Error:", error))
 }
+
+const addProduct = () => {
+    const title = document.getElementById("title").value
+    const description = document.getElementById("description").value
+    const price = document.getElementById("price").value
+    const thumbnail = document.getElementById("thumbnail").value
+    const code = document.getElementById("code").value
+    const stock = document.getElementById("stock").value
+    const status = document.getElementById("status").checked
+    const category = document.getElementById("category").value
+
+    const product = {
+        title,
+        description,
+        price,
+        thumbnail,
+        code,
+        stock,
+        status,
+        category,
+    }
+    fetch('api/products', {
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(product),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            console.log("Success:", data);
+            if (data.status === "error") {
+                alert(data.message);
+            }
+        })
+        .catch((error) => {
+            console.error("Error:", error);
+        });
+}   

@@ -1,19 +1,36 @@
 const { Router } = require('express')
-const handleResponses = require('../middleware/handleResp.js')
-const { handleAuthFront } = require('../middleware/handlePasp.js')
 const ViewsController = require('../controllers/views.controller.js')
-const router = Router();
-const vControl = new ViewsController()
+const { isAdmin, isUser } = require('../middleware/handleResp.js')
+const { isAuthenticated } = require('../middleware/handlePasp.js')
 
-// http://localhost:PORT/
-router
-    .get("/", handleAuthFront(['PUBLIC']), handleResponses, vControl.login)
-    .get("/register", handleAuthFront(['PUBLIC']), handleResponses, vControl.register)
-    .get("/products", handleAuthFront(['PUBLIC']), handleResponses, vControl.products)
-    .get("/products/:pid", handleAuthFront(['PUBLIC']), handleResponses, vControl.productById)
-    .get("/cart", handleAuthFront(['USER', 'USER_PREMIUM']), handleResponses, vControl.cart)
-    .get("/realTimeProducts", handleAuthFront(['USER_PREMIUM']), handleResponses, vControl.realTimeProducts)
-    .get("/chat", handleAuthFront(['USER', 'USER_PREMIUM']), handleResponses, vControl.chat)
-    .get('/user', handleAuthFront(['USER', 'USER_PREMIUM']), handleResponses, vControl.user);
+
+const router = Router()
+
+const {
+    home,
+    realTimeProducts,
+    chat,
+    products,
+    productsDetails,
+    login,
+    register,
+    shoppingCart
+} = new ViewsController()
+
+router.get('/', home)
+
+router.get('/realTimeProducts', isAdmin, realTimeProducts)
+
+router.get('/chat',isUser , chat)
+
+router.get('/products', products)
+
+router.get('/products/details/:pid', productsDetails)
+
+router.get('/login', login)
+
+router.get('/register', register)
+
+router.get('/cart', isAuthenticated, shoppingCart)
 
 module.exports = router

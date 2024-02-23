@@ -1,30 +1,47 @@
-const messageModel = require('./models/messages.model.js');
+const { messageModel } = require('./models/messages.model.js')
 
-class MessageDaoMongo {
+class messageDaoMongo {
     constructor() {
-        this.model = messageModel
+        this.model = messageModel 
     }
 
-    async addMessage(newMessage) {
-        await this.model.create(newMessage)
-        return await this.getMessages()
+    async user(user) {
+        return await this.model.findOne({ user: user })
     }
 
-    async getMessages() {
+    async messages() {
+        return await this.model.find({ })
+    }
+
+    async add(user, message) {
         try {
-            return await this.model.find({})
+            const userDocument = await this.model.findOne({ user: user })
+            if (!userDocument) {
+                console.error(`User ${user} not found`)
+                return null
+            }
+            userDocument.messages.push(message)
+            await userDocument.save()
+            return userDocument
         } catch (error) {
-            console.log(error);
+            console.error('Error adding message to user:', error)
+            throw error
         }
     }
 
-    async clearMessages() {
+    async create(user, message) {
         try {
-            return await this.model.deleteMany({})
+            const newUserDocument = new this.model({
+                user: user,
+                messages: [message]
+            })
+            await newUserDocument.save()
+            return newUserDocument
         } catch (error) {
-            console.log(error);
+            console.error('Error creating user with message:', error)
+            throw error
         }
     }
 }
 
-exports.MessageMongo = MessageDaoMongo;
+module.exports = messageDaoMongo

@@ -1,8 +1,5 @@
-const configObject = require('../config/index.js')
 const jwt = require('jsonwebtoken')
 
-const JWT_PRIVATE_KEY = configObject.jwt_code;
+JWT_PRIVATE_KEY = 'palabrasecretaparaeltoken'
 
-const createToken = (user) => jwt.sign(user, JWT_PRIVATE_KEY, { expiresIn: "1d" });
-
-module.exports = createToken;
+exports.generateToken = user => jwt.sign(user, JWT_PRIVATE_KEY, { expiresIn: '24h' })

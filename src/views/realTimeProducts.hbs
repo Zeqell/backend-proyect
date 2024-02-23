@@ -1,55 +1,39 @@
-<main>
-    <div class="swiper-container">
-        <h3>PRODUCTOS EN TIEMPO REAL</h3>
-        <p>Puede mover los productos para desplazarte a traves de ellos</p>
-        <div class="swiper-wrapper" id="swiper">
-            {{#each product}}
-            <div class="swiper-slide">
-                <img src={{this.thumbnail}}>
-                <p class="sw-title">{{this.title}}</p>
-                <p class="sw-price">Precio: $ {{this.price}}</p>
-                <p class="sw-code">Código: {{this.code}}</p>
-                <button onclick="deletePrd('{{this.code}}')">Eliminar</button>
-            </div>
-            {{/each}}
-        </div>
-        <div class="swiper-pagination"></div>
-    </div>
-
-
-    <form id="formRTP" class="formRTP">
-        <div class="formcol">
-            <div>
-                <label for="frimage">Direción Imagen</label>
-                <input type="text" name="frimage" id="frimage"
-                    value="https://newsport.vtexassets.com/arquivos/ids/17567638-800-auto?v=638358216130330000&width=800&height=auto&aspect=true">
-            </div>
-            <div>
-                <label for="frtitle">Producto</label>
-                <input type="text" name="frtitle" id="frtitle" value='EJEMPLO BICICLETA'>
-            </div>
-            <div>
-                <label for="frcat">Categoria</label>
-                <input type="text" name="frcat" id="frcat" value="Ruta">
-            </div>
-            <div>
-                <label for="frprice">Precio</label>
-                <input type="number" name="frprice" id="frprice" value="1198299">
-            </div>
-            <div>
-                <label for="frstock">Stock</label>
-                <input type="number" name="frstock" id="frstock" value="15">
-            </div>
-            <div>
-                <label for="frcode">Código del Producto</label>
-                <input type="text" name="frcode" id="frcode" value="PRUEBA01">
-            </div>
-            <input class="frButton" type="submit" value="Cargar Producto" id="frButton">
-        </div>
+<div>
+    <h2>Here, you can add or remove products</h2>
+</div>
+<h3>List of Products</h3>
+<div>
+    <form>
+        <input type="text" id="title" placeholder="Product title" />
+        <input type="text" id="description" placeholder="Product description" />
+        <input type="number" id="price" placeholder="Product price" />
+        <input type="text" id="thumbnail" placeholder="Product thumbnail" />
+        <input type="text" id="code" placeholder="Product code" />
+        <input type="number" id="stock" placeholder="Product stock" />
+        <input type="checkbox" id="status" placeholder="Product status" />
+        <input type="text" id="category" placeholder="Product category" />
+        <input type="button" value="Add product" onclick="addProduct()" />
     </form>
-
-</main>
-
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+</div>
+<div class="item-products" id="products">
+    <ul>
+        {{#each docs}}
+            <li>Title: {{this.title}}</li>
+            <li>Price: ${{this.price}}</li>
+            <li>Stock: {{this.stock}}</li>
+            <button onclick="removeProduct('{{this._id}}')">Remove</button>
+            <hr>
+        {{/each}}
+    </ul>
+</div>
+<div class="text-center" style="margin-top: 20px">
+        {{#if hasPrevPage}}
+            <a href="/?pageNumber={{prevPage}}" class="btn btn-dark" style="margin-right: 10px">Prev</a>
+        {{/if}}
+        <span class="page-number" style="margin-right: 10px">{{page}}</span>
+        {{#if hasNextPage}}
+            <a href="/?pageNumber={{nextPage}}" class="btn btn-dark">Next</a>
+        {{/if}}
+</div>
 <script src="/socket.io/socket.io.js"></script>
-<script src="./js/realTimeProducts.js"></script>
+<script src="/js/realTimeProducts.js"></script>

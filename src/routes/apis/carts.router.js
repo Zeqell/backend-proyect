@@ -1,17 +1,32 @@
-const { Router } = require('express') 
-const CartsController = require('../../controllers/cart.controller.js') 
-const router = Router();
-const cControl = new CartsController();
+const { Router } = require('express')
+const CartController = require('../../controllers/cart.controller.js')
+const { authenticateUser, isAuthenticated } = require('../../middleware/handlePasp.js')
 
-// http://localhost:PORT/api/carts/
+const router = Router()
+const {
+    getCarts,
+    getCartById,
+    createCart,
+    addProductToCart,
+    removeProductFromCart,
+    updateCart,
+    updateProductQuantity,
+    deleteAllProducts,
+    addProductToCart2,
+    purchaseCart,
+} = new CartController()
+
 router
-    .get('/', cControl.getCarts)
-    .get('/:cid', cControl.getCartById)
-    .post('/', cControl.create)
-    .post('/:cid/product/:pid', cControl.addProduct)
-    .put('/:cid', cControl.updateProducts) //+ body produc
-    .delete('/:cid', cControl.removeProducts) //+ body produc
-    .put('/:cid/product/:pid', cControl.updateProductQuantity) //+ body quantity
-    .delete('/:cid/product/:pid', cControl.removeProductById);
+    .get('/', getCarts)
+    .post('/', createCart)
+    .get('/:cid', getCartById)
+    .post('/:cid/product/:pid', addProductToCart)
+    .delete('/:cid/product/:pid', removeProductFromCart)
+    .put('/:cid', updateCart)
+    .put('/:cid/products/:pid', updateProductQuantity)
+    .delete('/:cid', deleteAllProducts)
+    .post('/:pid', isAuthenticated, addProductToCart2)
+    .post('/:cid/purchase', isAuthenticated, purchaseCart)
 
-module.exports = router;
+
+module.exports = router

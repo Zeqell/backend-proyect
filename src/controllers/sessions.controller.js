@@ -1,134 +1,187 @@
-const configObject = require('../config/index.js')
-const { UserClass } = require('../daos/index.js')
-const createToken = require('../util/createToken.js')
-const CustomError = require('../util/err.js')
-const { createHash, isValidPassword } = require('../util/passwords.js') 
-const validateFields = require('../util/validate.js')
+const { createHash, isValidPassword } = require('../util/passwords.js')
+const { generateToken } = require('../util/createToken.js')
+const { cartService, userService } = require('../repositories/service.js')
 
-const userService = new UserClass();
 
-class SessionsController {
-    constructor() {
-        this.service = "";
+class SessionController {
+    constructor(){
+        this.cartService = cartService
+        this.userService = userService
     }
-    requieredfield = {
-        register: ['first_name', 'last_name', 'email', 'birthday', 'password'],
-        login: ['email', 'password']
-    }
-    admins = configObject.uadmins || []
-    admin_pass = configObject.uadmin_pass
 
-    register = async (req, res) => {
-        try {
-            const userData = validateFields(req.body, this.requieredfield.register);
-            userData.password = createHash(userData.password)
-
-            const userFound = await userService.getUserByMail(userData.email);
-
-            if (userFound) throw new CustomError(`Ya existe un usuario con ese email. pruebe con otro`)
-
-            await userService.createUser(userData)
-
-            res.renderPage("login", "Login", { answer: 'Se ha registrado satisfactoriamente' })
-
-        } catch (error) {
-            if (error instanceof CustomError) {
-                res.renderPage("register", "Nuevo Registro", { answer: error.message })
-            } else {
-                res.renderPage("register", "Nuevo Registro", { answer: 'Ocurrio un error, vuelva a intentarlo' })
-            }
+    register = async (req,res) =>{
+        const { first_name, last_name, date, email, password, role} = req.body
+    
+        if(first_name === '' || last_name === '' || email === '' || password === '') {
+            return res.send('All fields must be required')
         }
-    }  // Respuesta Visual
-
-    login = async (req, res) => {
-        const userData = validateFields(req.body, this.requieredfield.login);
-
+        
         try {
-            if (this.admins.includes(userData.email) && isValidPassword(userData.password, { password: this.admin_pass })) {
-
-                const token = createToken({ id: 0, role: "Admin" })
-                return res.sendTokenCookieSuccess(token, "Log In exitoso con Usuario Administrador")
+            const existingUser = await this.userService.getUserBy({email})
+    
+            console.log(existingUser)
+            if (existingUser) {
+                return res.send({ status: 'error', error: 'This user already exists' })
             }
-
-            const userFound = await userService.getUserByMail(userData.email);
-
-            if (!userFound || !isValidPassword(userData.password, userFound)) {
-                throw new CustomError(`Email o contraseña equivocado`);
+    
+            const cart = await this.cartService.createCart()
+    
+            const newUser = {
+                first_name,
+                last_name,
+                date,
+                email,
+                password: createHash(password),
+                cart: cart._id,
+                role,
             }
-
-            const token = createToken({ id: userFound._id, role: userFound.role })
-            res.sendTokenCookieSuccess(token, "Log In exitoso con Id: " + userFound.first_name)
-
-        } catch (error) {
-            res.sendCatchError(error)
-        }
-    }
-
-    loginSession = async (req, res) => {
-        const userData = validateFields(req.body, this.requieredfield.login);
-
-        try {
-            if (userData.email == configObject.uadmin && isValidPassword(userData.password, { password: configObject.uadmin_pass })) {
-                req.session.user = {
-                    first_name: "Admin",
-                    email: userData.email,
-                    role: "Admin"
-                };
-                return res.redirect('/products');
-            }
-
-            const userFound = await users.getUserByMail(userData.email);
-            if (!userFound || isValidPassword(createHash(userData.password), userFound)) {
-                throw new CustomError(`Email o contraseña equivocado`);
-            }
+    
+            const result = await this.userService.createUser(newUser)
 
             req.session.user = {
-                user: userFound._id,
-                first_name: userFound.first_name,
-                last_name: userFound.last_name,
-                email: userFound.email,
-                role: userFound.role,
-            };
-
-            res.redirect('/products');
-
-        } catch (error) {
-            if (error instanceof CustomError) {
-                //resError(res, 400, "Email o contraseña equivocado")
-                res.sendUserError(error)
-            } else {
-                //resError(res, 500, "Ocurrio un error, vuelva a intentarlo")
-                res.sendServerError(error)
+                id: result._id,
+                first_name: result.first_name,
+                last_name: result.last_name,
+                email: result.email,
+                cart: result.cart,
+                role: result.role
             }
-        }
-    }
-
-    logout = (req, res) => {
-        /*req.session.destroy((err) => {
-        if (err) return res.send({ status: 'error', error: err });
-        });*/
-        res.clearCookie('token').redirect('/');
-    }
-
-    // GITHUB
-    github = async (req, res) => { }
-    githubcallback = (req, res) => {
-        //req.session.user = req.user
-        const token = createToken({ id: req.user._id, role: req.user.role })
-
-        res.tokenCookie(token).redirect('/products');
-    }
-
-    // TODO Pruebas --> http://localhost:PORT/api/sessions/current
-    pruebasCurrent = (req, res) => {
-        //router.get('/current', handleResponses, passportCall('jwt'), /*authPJwt('admin'),*/ (req, res) => {
-        try {
-            const datosP = { message: "Datos sensibles", reqUser: req.user }
-            res.renderPage('current', 'PRUEBA', { contenido: JSON.stringify(datosP) })
+    
+            const token = generateToken({
+                id: result._id,
+                first_name: result.first_name,
+                last_name: result.last_name,
+                email: result.email,
+                cart: result.cart,
+                role: result.role
+            })
+    
+            res.cookie('token', token, {
+                maxAge: 60*60*1000*24,
+                httpOnly: true,
+            }).send({
+                status: 'success',
+                payload: {
+                    id: result._id,
+                    first_name: result.first_name,
+                    last_name: result.last_name,
+                    email: result.email,
+                    role: result.role
+                }
+            })
         } catch (error) {
-            return res.renderError(error.error)
+            console.error('Error during user registration:', error)
+            res.status(500).send({ status: 'error', error: 'Internal Server Error' })
         }
+    }
+
+    login = async (req,res) => {
+        const { email, password } = req.body
+    
+        if(email === '' || password === '') {
+            return res.send('All fields must be required')
+        }
+    
+        try{
+            const user = await this.userService.getUserBy({ email })
+            
+            if(user.email === 'adminCoder@coder.com' && password === user.password){
+    
+                await this.userService.updateRole(user._id, 'admin')
+                console.log('-----------')
+                req.session.user = {
+                    id: user._id,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    email: user.email,
+                    role: 'admin'
+                }
+                const token = generateToken({
+                    id: user._id,
+                    role: user.role
+                })
+    
+                res.cookie('token', token, {
+                    maxAge: 60*60*1000*24,
+                    httpOnly: true,
+                }).redirect('/products')
+            }
+            else{
+    
+                if (!user) {
+                    return res.send('email or password not valid')
+                }
+    
+                if (!isValidPassword(password, { password: user.password })) {
+                    return res.send('email or password not valid')
+                }
+    
+                req.session.user = {
+                    user: user._id,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    email: user.email,
+                    cart: user.cart,
+                    role: user.role
+                }
+    
+                const token = generateToken({
+                    id: user._id,
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    email: user.email,
+                    cart: user.cart,
+                    role: user.role
+                })
+    
+                res.cookie('token', token, {
+                    maxAge: 60*60*1000*24,
+                    httpOnly: true,
+                }).redirect('/products')
+            }
+    
+        } catch(error) {
+            console.error('Error during user login:', error)
+            res.status(500).send({ status: 'error', error: 'Internal Server Error' })
+        }
+    }
+
+    logout = async (req,res) =>{
+        try{
+            req.session.destroy((err) =>{
+                if(err){
+                    console.error('Error during session destruction:', err)
+                    return res.status(500).send({ status: 'error', error: 'Internal Server Error' })
+                }
+    
+                res.redirect('/login')
+            })
+        }catch(error) {
+            console.error('Error during logout:', error)
+            res.status(500).send({ status: 'error', error: 'Internal Server Error' })
+        }
+    }
+
+    current = (req,res) => {
+        if (req.user) {
+            const { first_name, last_name, role } = req.user
+            const userDTO = {
+                first_name: first_name,
+                last_name: last_name,
+                role: role
+            }
+            res.json(userDTO)
+        } else {
+            res.status(401).json({ error: "Unauthorized" })
+        }
+    }
+
+    github = async (req,res)=>{}
+
+    githubCallback = (req, res) => {
+        req.session.user = req.user
+        res.redirect('/products')
     }
 }
 
-module.exports = SessionsController;
+module.exports = SessionController

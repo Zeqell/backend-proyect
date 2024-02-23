@@ -1,33 +1,113 @@
-const productModel = require('./models/products.model.js') 
-class ProductDaoMongo {
-    constructor() {
-        this.model = productModel;
+const { productModel } = require("./models/products.model.js")
+
+class productDaoMongo {
+    constructor(){
+        this.model = productModel
     }
 
-    getProducts = async (query, options) => await this.model.paginate(query, options);
+    async add(title, description, price, thumbnail, code, stock, status, category){
+        
+        const existingProduct = await this.model.findOne({ code })
 
-    getProductsById = async (pid) => await this.model.findById({ _id: pid }).lean();
+        if (existingProduct) {
+            console.log("This product has already been added")
+        } else {
+            if (!title || !description || !price || !code || !stock) {
+              console.log("Incorrect product: One of these properties is not valid")
+            }else{
+                const lastProduct = await this.model.findOne({}, {}, { sort: { 'id': -1 } })
+                const newProduct = new this.model({
+                    title,
+                    description,
+                    price,
+                    thumbnail,
+                    code,
+                    stock,
+                    status,
+                    category,
+                })
 
+                await newProduct.save()
+            }
+        }
+    }
 
-    addProduct = async (fields) => await this.model.create(fields);
+    async get({ limit = 10, pageNumber = 1, sort, query } = {}){
+        const filter = { isActive: true }
+        if (query) {
+            filter.$or = [
+                { title: { $regex: query, $options: 'i' } },
+                { description: { $regex: query, $options: 'i' } },
+                { category: { $regex: query, $options: 'i' } },
+            ]
+        }
+        const options = {
+            limit: parseInt(limit),
+            page: parseInt(pageNumber),
+            sort: sort ? { price: sort === 'asc' ? 1 : -1 } : undefined,
+            lean: true
+        }
 
-    updateProduct = async (pid, changedProduct) => await this.model.findByIdAndUpdate(pid, changedProduct, { new: true });
+        const result = await this.model.paginate(filter, options)
+        return {
+            docs: result.docs,
+            hasPrevPage: result.hasPrevPage,
+            hasNextPage: result.hasNextPage,
+            prevPage: result.prevPage,
+            nextPage: result.nextPage,
+            page: result.page
+        }
+    }
 
-    deleteProductById = async (pid) => await this.model.findByIdAndDelete(pid);
+    async getById(pid){
+        const product = await this.model.findOne({ _id: pid }).lean()
 
-    deleteProductByCode = async (pcode) => await this.model.findOneAndDelete({ code: pcode });
+        if (product) {
+            return [product]
+        } else {
+            console.log("This product does not exist")
+            return []
+        }
+    }
 
-    getCategorys = async () => await this.model.distinct('category').sort();
+    async update(id, title, description, price, thumbnail, code, stock, status, category){
+        const updatedProduct = await this.model.findByIdAndUpdate(
+            id,
+            {
+              $set: {
+                title,
+                description,
+                price,
+                thumbnail,
+                code,
+                stock,
+                status,
+                category,
+              },
+            },
+            { new: true } 
+        )
+    
+        if (updatedProduct) {
+            console.log("Product updated successfully")
+        } else {
+            console.log("The product to be updated was not found")
+        }
+    }
 
-    // getCategorys = async () => {
-    // const categories = await this.model.aggregate([
-    //   { $group: { _id: "$category" } },
-    //   { $sort: { _id: 1 } },
-    // ]);
-    // return categories.map((cat) => {
-    //   return cat._id;
-    // });
-    // };
+    async delete(pid){
+        const product = await this.model.findOne({ _id: pid })
+        if (product) {
+            product.isActive = false
+
+            await product.save()
+    
+            console.log("Product deactivated successfully")
+        } else {
+            console.log("No such product exists")
+        }
+    }
+
 }
 
-module.exports = ProductDaoMongo;
+module.exports = productDaoMongo

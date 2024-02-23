@@ -1,23 +1,37 @@
-const  { CartClass }  = require('../index.js') 
-const usersModel = require('./models/user.model.js')
+const { userModel } = require("./models/user.model.js")
 
-const cartsService = new CartClass();
-
-class UserDaoMongo {
-    constructor() {
-        this.model = usersModel;
+class userDaoMongo {
+    constructor(){
+        this.userModel = userModel
     }
-    getUsersPaginate = async (limit = 10, page = 1) => await this.model.paginate({}, { limit, page, lean: true })
 
-    getUsers = async () => await this.model.find({})
-    getUserById = async (uid) => await this.model.findOne({ _id: uid })
-    getUserByMail = async (uemail) => await this.model.findOne({ email: uemail })
-    createUser = async (newUser) => {
-        newUser.cart = await cartsService.create();
-        await this.model.create(newUser)
+    async get() {
+        return await this.userModel.find({})
     }
-    updateUser = async (uid, userUpdate) => await this.model.findOneAndUpdate({ _id: uid }, userUpdate)
-    deleteUser = async (uid) => await this.model.findOneAndDelete({ _id: uid })
+
+    async getBy(filter) {
+        return await this.userModel.findOne(filter)
+    }
+
+    async create(newUser) {
+        return await this.userModel.create(newUser)
+    }
+
+    async update(uid, userUpdate) {
+        return await this.userModel.findOneAndUpdate({_id: uid}, userUpdate)
+    }
+
+    async updateRole(userId, newRole){
+        try{
+            return await this.userModel.findByIdAndUpdate(userId, { role: newRole }, { new: true })
+        }catch (err){
+            console.error('Error updating user role:', err)
+        }
+    }
+
+    async delete(uid) {
+        return await this.userModel.findOneAndDelete({_id: uid})
+    }
 }
 
-module.exports= UserDaoMongo;
+module.exports = userDaoMongo

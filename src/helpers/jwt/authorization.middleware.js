@@ -1,20 +1,13 @@
-const customError = require('../../util/err.js')
-const { renderPage } = require('../../helpers/responses.js')
-
-const authorizationJwt = (roleArray) => {
-    return (req, res, next) => {
+exports.authorization = roleArray => {
+    return async (req, res, next)=>{
         try {
-            if (!req.user) throw new customError('Unauthorized', 401)
-            if (!roleArray.includes(req.user.role.toUpperCase())) throw new CustomError('Not permissions', 403)
+            if (!req.user) return res.status(401).send({status: 'error', message: 'Unauthorized'})
+            // if (req.user.role.toUpperCase() === role)  return res.status(403).send({status: 'error', message: 'Not permissions'})
+            if(roleArray[0] === 'PUBLIC' || roleArray[0] === 'ADMIN') return next() 
+            if(!roleArray.includes(req.user.role.toUpperCase())) return res.status(403).send({status: 'error', message: 'Not permissions'})
             next()
         } catch (error) {
-            if (error instanceof customError) {
-                renderPage(res, "login", "Inicio", { control: { answer: error.message } });
-            } else {
-                renderPage(res, "login", "Inicio", { control: { answer: 'Ocurrio un error, vuelva a intentarlo' } });
-            }
+            next(error)
         }
-    };
-};
-
-module.exports = authorizationJwt
+    }
+}

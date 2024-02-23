@@ -1,84 +1,34 @@
-let validate = false;
+const socket = io()
 
-const socket = io();
+const chatBox = document.getElementById('chatBox')
+const messageLogs = document.getElementById('messageLogs')
 
-const chatBox = document.querySelector('#chatBox');
-const chatUser = document.querySelector('#chatUser');
-const checkUser = document.querySelector('#checkUser');
-const messageLogs = document.querySelector('#messageLogs');
-const clearMessages = document.querySelector('#clearMessages')
+Swal.fire({
+    title: 'Your email',
+    input: 'text',
+    text: 'Fill with your email to chat',
+    allowOutsideClick: false,
+    inputValidator: value => {
+        return !value && 'You need fill the box to chat'
+    }
+}).then(result => {
+    user = result.value
+    console.log(user)
+})
 
-chatBox.addEventListener('keyup', (e) => {
-    if (!validate) { validateUser() }
-    if (e.key === 'Enter') {
-        if (chatBox.value.trim().length > 0) {
-            socket.emit('message', { user: chatUser.value, message: chatBox.value })
+chatBox.addEventListener('keyup', evt => {
+    if(evt.key === 'Enter'){
+        if(chatBox.value.trim().length > 0){
+            socket.emit('message', { user, message: chatBox.value })
             chatBox.value = ''
         }
     }
 })
 
-//corregir el evento de cargado inicial
-chatBox.addEventListener('load', () => {
-    socket.emit('init', "dato")
-})
-
-socket.on('messageLogs', data => {
-    let messageLog = '';
-    data.forEach(elm => {
-        messageLog += `
-    <div class="log">
-        <p class="user">${elm.user}</p>
-        <p class="text">${elm.message}</p>
-        <p class="date">${new Date(elm.atCreated).toLocaleString()}</p>
-    </div>
-    `
-    });
-    messageLogs.innerHTML = messageLog;
-})
-
-chatUser.addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') {
-        if (validator.isEmail(chatUser.value)) {
-            changeValidate(true)
-        } else {
-            changeValidate(false)
-        }
-    } else {
-        changeValidate(false)
+socket.on('messageLogs', (data) => {
+    console.log(`${data.user}: ${data.message}`)
+    if (data && data.message) {
+        const messageLogs = document.getElementById('messageLogs')
+        messageLogs.innerHTML += `<p>${data.user}: ${data.message.message}</p>`
     }
-})
-
-function validateUser() {
-    Swal.fire({
-        title: 'Indentifícate con tu email',
-        input: 'email',
-        text: 'Ingrese un e-mail para identificarse',
-        allowOutsideClick: false,
-        inputValidator: value => {
-            if (!validator.isEmail(value)) {
-                return 'Necesitas escribir un e-mail para continuar!!'
-            }
-        }
-    }).then(result => {
-        changeValidate(true)
-        chatUser.value = result.value
-    })
-}
-
-function changeValidate(check) {
-    if (check) {
-        validate = true;
-        checkUser.classList.remove('visibleOff')
-    } else {
-        validate = false;
-        checkUser.classList.add('visibleOff')
-    }
-}
-
-//coregir evento que deberia borrar mongo mensajes
-clearMessages.addEventListener('click', () => {
-    fetch('http://localhost:8080/api/messages', { method: "DELETE" });
-    messageLogs.innerHTML = '';
-    socket.emit('init', "dato")
 })

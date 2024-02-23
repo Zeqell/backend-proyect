@@ -1,5 +1,5 @@
-document.querySelector('#logOut').addEventListener('click', async () => {
-    await fetch("/api/sessions/logout")
+// document.querySelector('#logOut').addEventListener('click', async () => {
+//     await fetch("/api/sessions/logout")
 
-    window.location.href = "/";
-})
+//     window.location.href = "/";
+// })

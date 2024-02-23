@@ -1,25 +1,17 @@
-const { Router } = require('express')
-const viewsRouter = require('./views.router.js')
-const productsRoute = require('./apis/products.router.js') 
-const messagesRoute = require('./apis/messages.ruter.js') 
-const sessionsRoute = require('./apis/sessions.router.js')
-const cartRouter = require('./apis/carts.router.js')
+const {Router} = require('express')
 
-const handleResponses = require('../middleware/handleResp.js') 
+const productRouter = require('./apis/products.router.js')
+const cartRouter = require('./apis/carts.router.js')
+const viewsRouter = require('./views.router.js')
+const sessionRouter = require('./apis/sessions.router.js')
+const mailRouter = require('./apis/mail.router.js')
 
 const router = Router()
 
-// definiendo vistas
-router.use('/', viewsRouter);
+router.use('/api/products', productRouter)
+router.use('/api/carts', cartRouter)
+router.use('/', viewsRouter)
+router.use('/api/session', sessionRouter)
+router.use('/api', mailRouter)
 
-// definiendo las API
-router.use('/api/products/', handleResponses, productsRoute);
-router.use('/api/carts/', handleResponses, cartRouter);
-router.use('/api/sessions/', handleResponses, sessionsRoute);
-router.use('/api/messages', handleResponses, messagesRoute);
-router.use('/api/users/', () => {});
-
-router.use('*', (req, res) => res.status(404).send('Not Found'))
-router.use((err, req, res, next) => res.status(500).json({message: "Error Server", err}))
-
-module.exports = router;
+module.exports = router

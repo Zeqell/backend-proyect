@@ -1,52 +1,41 @@
-const { connect } = require('mongoose')
-const session = require('express-session')
-const MongoStore = require('connect-mongo')
 const dotenv = require('dotenv')
-const program = require('./comander.js')
+const {program} = require('./comander.js')
+const { connect } = require('mongoose')
 
-const opts = program.opts();
+const {mode} = program.opts();
+console.log('mode config: ', mode)
 
 dotenv.config({
-    path: opts.mode == 'production' ? './.env.production' : './.env.development'
+    path: mode === 'production' ? './.env.production' : './.env.development'
 })
 
 const configObject = {
-    //conexion Mongo Atlas a traves de mongoose
-    port: process.env.PORT = 8080,
-    jwt_code: process.env.JWT_SECRET_CODE = 'SECRET',
-    cookies_code: process.env.COOKIES_SECRET_CODE,
-    mongo_uri: process.env.MONGO_URI = ('mongodb+srv://schrezequiel:fQWo3jPqws72nKLV@cluster0.0xvbopt.mongodb.net/'),
-    uadmin: process.env.USER_ADMIN,
-    uadmin_pass: process.env.USER_ADMIN_PASS,
-    gh_client_id: process.env.GITHUB_CLIENT_ID = 'Iv1.89e297da0de35b33',
-    gh_client_secret: process.env.GITHUB_CLIENT_SECRET = 'ea5a9ae2945796ffb01eb824c56f8dee4520f0f9',
-    development: opts.mode == 'development',
-
-    connectDB: async () => {
-        // await mongoose.connect(process.env.MONGO_URI);
-        // console.log('Base de datos conectada');
-        MongoSingleton.getInstance();
-    },
-    //conexion Mongo Atlas session
-    sessionAtlas: (app) => {
-        app.use(
-            session({
-                store: MongoStore.create({
-                    mongoUrl: process.env.MONGO_URI,
-                    mongoOptions: {
-
-                    },
-                    ttl: 3600, // milisegundos --> hs
-                }),
-                secret: process.env.COOKIES_SECRET_CODE,
-                resave: true,
-                saveUninitialized: true,
-            })
-        );
-    },
+    port: process.env.PORT || 4000,
+    jwt_code: process.env.JWT_SECRET_CODE,
+    mongo_uri: process.env.MONGO_URI,
+    persistence: process.env.PERSISTENCE,
+    // uadmins: process.env.USERS_ADMIN,
+    // uadmin_pass: process.env.USER_ADMIN_PASS,
+    // gh_client_id: process.env.GITHUB_CLIENT_ID,
+    // gh_client_secret: process.env.GITHUB_CLIENT_SECRET,
+    gmail_user_app: process.env.GMAIL_USER_APP ,
+    gmail_pass_app: process.env.GMAIL_PASS_APP,
+    // twilio_account_sid: process.env.TWILIO_ACCOUNT_SID,
+    // twilio_atuh_token: process.env.TWILIO_ATUH_TOKEN,
+    // twilio_number_phone: process.env.TWILIO_NUMBER_PHONE, 
 }
+
+const connectDb = async () => {
+        try {
+            MongoSingleton.getInstance()
+            console.log("Db connected")
+        } catch (error) {
+            console.log(error)
+    }  
+}
+
 class MongoSingleton {
-    static instance //
+    static instance
     constructor() {
         connect(process.env.MONGO_URI);
     }
@@ -60,7 +49,11 @@ class MongoSingleton {
         return this.instance;
     }
 }
-module.exports = configObject
+
+module.exports = {
+    configObject,
+    connectDb,
+}
 
 
 

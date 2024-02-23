@@ -2,12 +2,25 @@
 ###
 GET http://localhost:8080/api/products
 
+###
+POST http://localhost:4000/api/products 
+
+Content-Type: application/json
+    {
+    "title": "producto uno",
+    "price": 150000,
+    "thumbnail": [],
+    "code": "uno",
+    "category": "cocina"
+    }
+
+
 ### 
-POST http://localhost:8080/api/carts
+POST http://localhost:4000/api/carts
 
 ###
-POST http://localhost:8080/api/carts/659745571bd213c4f84e57ab
+POST http://localhost:4000/api/carts/
 
 
 ### 
-DELETE http://localhost:8080/api/carts/659745571bd213c4f84e57ab
+DELETE http://localhost:4000/api/carts/

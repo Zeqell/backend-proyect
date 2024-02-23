@@ -1,17 +1,21 @@
-const { Router } = require('express') 
-const ProductsController = require('../../controllers/products.controller.js') 
-const router = Router();
+const { Router } = require('express')
+const ProdcutsController = require('../../controllers/products.controller.js')
 
-const { getProducts, getProductsById, createProduct, updateProductById, deleteProductById, deleteProductByCode, getCategorys } = new ProductsController
+const router = Router()
+const {
+    getProducts,
+    getProductById,
+    addProduct,
+    updateProduct,
+    deleteProduct
+} = new ProdcutsController()
 
-// * http://localhost:PORT/api/products
 router
-    .get("/", getProducts)       
-    .get("/:pid", getProductsById)
-    .post("/", createProduct)      
-    .put("/:pid", updateProductById)  
-    .delete("/:pid", deleteProductById)
-    .delete("/", deleteProductByCode)
-    .get("/group/categorys", getCategorys)
+    .get('/', getProducts)
+    .get('/:pid', getProductById)
+    .post('/', addProduct)
+    .put('/:pid', updateProduct)
+    .delete('/:pid', deleteProduct)
 
-module.exports = router;
+
+module.exports = router
