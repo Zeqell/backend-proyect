@@ -2,18 +2,11 @@
 ###
 GET http://localhost:8080/api/products
 
+### 
+POST http://localhost:8080/api/
+
 ###
-POST http://localhost:4000/api/products 
-
-Content-Type: application/json
-    {
-    "title": "producto uno",
-    "price": 150000,
-    "thumbnail": [],
-    "code": "uno",
-    "category": "cocina"
-    }
-
+POST http://localhost:8080/api/products 
 
 ### 
 POST http://localhost:4000/api/carts

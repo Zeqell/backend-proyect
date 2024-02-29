@@ -1,7 +1,7 @@
 const { Router } = require('express')
 const ViewsController = require('../controllers/views.controller.js')
 const { isAdmin, isUser } = require('../middleware/handleResp.js')
-const { isAuthenticated } = require('../middleware/handlePasp.js')
+const { authenticateUser } = require('../middleware/handlePasp.js')
 
 
 const router = Router()
@@ -31,6 +31,6 @@ router.get('/login', login)
 
 router.get('/register', register)
 
-router.get('/cart', isAuthenticated, shoppingCart)
+router.get('/cart', authenticateUser, shoppingCart)
 
 module.exports = router

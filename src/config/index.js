@@ -10,7 +10,7 @@ dotenv.config({
 })
 
 const configObject = {
-    port: process.env.PORT || 4000,
+    port: process.env.PORT || 8080,
     jwt_code: process.env.JWT_SECRET_CODE,
     mongo_uri: process.env.MONGO_URI,
     persistence: process.env.PERSISTENCE,

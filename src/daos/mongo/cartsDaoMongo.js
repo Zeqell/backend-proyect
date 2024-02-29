@@ -36,7 +36,7 @@ class cartDaoMongo {
             
         if (!cart) {
             const newCart = await this.model.create({
-               products: [],
+                products: [],
             })
             cart = newCart
         }

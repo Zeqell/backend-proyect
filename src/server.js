@@ -9,6 +9,7 @@ const appRouter = require('./routes/index.js')
 const cookie = require('cookie-parser')
 const configureSocketIO = require('./helpers/serverOI.js')
 const handlebars = require('express-handlebars')
+const { handleError } = require('./middleware/error/handleError.js')
 const handlebarsHelpers = require('handlebars-helpers')()
 const eq = handlebarsHelpers.eq
 
@@ -24,16 +25,17 @@ app.use(session({
     store: mongoStore.create({
         mongoUrl: process.env.MONGO_URI,
         mongoOptions: {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
+            // useNewUrlParser: true,
+            // useUnifiedTopology: true,
         },
         ttl: 15000000000,
     }),
-    secret: 'secret',
+    secret: process.env.JWT_SECRET_CODE,
     resave: true,
     saveUninitialized: true
 }))
 app.use(appRouter)
+app.use(handleError)
 
 initializePassport()
 app.use(passport.initialize())

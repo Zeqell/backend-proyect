@@ -1,5 +1,3 @@
-const productDaoMongo = require('../daos/mongo/productsDaoMongo.js')
-const userDaoMongo = require('../daos/mongo/userDaoMongo.js')
 const { productService, userService, cartService } = require('../repositories/service.js')
 
 class ViewsController {

@@ -36,8 +36,6 @@ switch (configObject.persistence) {
         break;
 }
 
-console.log('====================================',UserDao)
-
 module.exports = {
     UserDao,
     ProductDao,

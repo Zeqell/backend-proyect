@@ -13,7 +13,7 @@ class productDaoMongo {
             console.log("This product has already been added")
         } else {
             if (!title || !description || !price || !code || !stock) {
-              console.log("Incorrect product: One of these properties is not valid")
+                console.log("Incorrect product: One of these properties is not valid")
             }else{
                 const lastProduct = await this.model.findOne({}, {}, { sort: { 'id': -1 } })
                 const newProduct = new this.model({
@@ -74,7 +74,7 @@ class productDaoMongo {
         const updatedProduct = await this.model.findByIdAndUpdate(
             id,
             {
-              $set: {
+                $set: {
                 title,
                 description,
                 price,
@@ -83,7 +83,7 @@ class productDaoMongo {
                 stock,
                 status,
                 category,
-              },
+                },
             },
             { new: true } 
         )

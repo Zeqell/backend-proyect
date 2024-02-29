@@ -1,4 +1,7 @@
 const { productService } = require('../repositories/service.js')
+const customError = require('../services/CustomError.js')
+const { EErrors  } = require('../services/enums.js')
+const { generateProductErrorInfo } = require('../services/generateErrorInfo.js')
 
 class ProdcutsController {
     constructor(){
@@ -18,62 +21,96 @@ class ProdcutsController {
         }
     }
 
-    getProductById = async (req,res)=>{
+    getProductById = async (req,res,next)=>{
         try{
             const pid = req.params.pid
-            const filteredProduct = await this.productService.getProductById(pid)
-            if(filteredProduct){
+            if(!pid){
+            }
+            customError.createError({
+                name: 'Not found a product',
+                cause: generateProductErrorInfo(filteredProduct),
+                message: 'Error, trying to found a product',
+                code: EErrors.INVALID_TYPES_ERROR
+            })
+            const filteredProduct = await this.productService.getProductById(pid)            
                 res.json({
                     status: 'succes',
                     payload: filteredProduct
                 })
-            }
-            else{
-                res.status(404).send("Product not exist")
-            }
         }catch(error) {
-            console.error(error)
-            res.status(500).send('Server error')
+            next(error)
         }
     }
 
-    addProduct = async (req,res)=>{
+    addProduct = async (req,res, next)=>{
         try {
             const {
-              title,
-              description,
-              price,
-              thumbnail,
-              code,
-              stock,
-              status,
-              category,
+                title,
+                description,
+                price,
+                thumbnail,
+                code,
+                stock,
+                status,
+                category,
             } = req.body
+
+            if(!title || !price || !code || !stock){
+                customError.createError({
+                    name: 'Product creation error',
+                    cause: generateProductErrorInfo({
+                        title,
+                        description,
+                        price,
+                        thumbnail,
+                        code,
+                        stock,
+                        status,
+                        category,
+                    }),
+                    message: 'Error trying to add a product',
+                    code: EErrors.INVALID_TYPES_ERROR
+                })
+            }
         
             await this.productService.addProduct(title, description, price, thumbnail, code, stock, status, category)
-        
-              res.json({
+            res.json({
                 status: 'success',
                 message: 'Product added successfully',
-              });
+                });
             } catch (error) {
-              console.error(error);
-              res.status(500).send('Server error');
+                next(error)
         }
     }
 
-    updateProduct = async (req,res)=>{
+    updateProduct = async (req,res, next)=>{
         try{
             const pid = req.params.pid
             const {title, description, price, thumbnail, code, stock, status, category} = req.body
+            if(!title || !price || !code || !stock){
+                customError.createError({
+                    name: 'Product to update error',
+                    cause: generateProductErrorInfo({
+                        title,
+                        description,
+                        price,
+                        thumbnail,
+                        code,
+                        stock,
+                        status,
+                        category,
+                    }),
+                    message: 'Error trying to update a product',
+                    code: EErrors.INVALID_TYPES_ERROR
+                })
+            }
             await this.productService.updateProduct(pid, title, description, price, thumbnail, code, stock, status, category)
             res.json({
                 status: 'success',
                 message: 'Product updated successfully',
             })
         }catch(error){
-            console.log(error)
-            res.status(500).send('server error')
+            next(error)
         }
     }
 
@@ -97,8 +134,6 @@ class ProdcutsController {
             res.status(500).send('server error')
         }
     }
-
-
 }
 
 module.exports = ProdcutsController

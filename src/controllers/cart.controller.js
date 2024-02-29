@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 const { cartService, userService, productService } = require('../repositories/service.js')
 const { ticketModel } = require('../daos/mongo/models/ticket.model.js')
+const customError = require('../services/CustomError.js')
+const { generateCartErrorInfo, generateCartRemoveErrorInfo  } = require('../services/generateErrorInfo.js')
+const { EErrors } = require('../services/enums.js')
 
 class CartController {
     constructor(){
@@ -72,25 +75,32 @@ class CartController {
         }
     }
 
-    removeProductFromCart = async (req,res) =>{
+    removeProductFromCart = async (req,res, next) =>{
         try {
             const { cid, pid } = req.params
+            if(!cid || !pid){
+                customError.createError({
+                    name:'Error to remove product from cart',
+                    cause: generateCartRemoveErrorInfo(cid, pid),
+                    message: 'Cant remove product from cart',
+                    code:EErrors.INVALID_TYPES_ERROR
+                })
+            }
             const result = await this.cartService.removeProductFromCart(cid, pid)
-      
+
             if (result.success) {
-              res.json({
+                res.json({
                 status: 'success',
                 message: 'Product removed from cart successfully',
-              })
+                })
             } else {
-              res.status(404).json({
+                res.status(404).json({
                 status: 'error',
                 message: 'Product or cart not found',
-              })
+                })
             }
         } catch (error) {
-            console.error(error)
-            res.status(500).send('Server error')
+            next(error)
         }
     }
 
@@ -163,18 +173,19 @@ class CartController {
         }
     }
 
-    addProductToCart2 = async (req, res) => {
+    addProductToCart2 = async (req, res, next) => {
         try {
             const { pid } = req.params
             const user = req.session.user
+            const cId = user.cart
             if (!user || !user.cart) {
-                return res.status(404).json({
-                    status: 'error',
-                    message: 'User not found or user does not have a cart',
+                customError.createError({
+                    name: 'Add product to cart error',
+                    cause: generateCartErrorInfo(user, cId),
+                    message: 'Error tryng add product to cart',
+                    code:EErrors.INVALID_TYPES_ERROR
                 })
             }
-            const cId = user.cart
-            
             console.log(cId)
             await this.cartService.addProductToCart(cId, pid)
 
@@ -183,11 +194,7 @@ class CartController {
                 message: 'Product added to cart successfully',
             })
         } catch (error) {
-            console.error(error)
-            res.status(500).json({
-                status: 'error',
-                message: 'Server error',
-            })
+            next(error)
         }
     }
 
