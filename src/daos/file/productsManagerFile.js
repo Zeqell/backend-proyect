@@ -1,4 +1,5 @@
 const fs = require('node:fs')
+const { logger } = require('../../util/logger')
 const path = './src/mockDB/products.json'
 
 class ProductManagerFile{
@@ -8,7 +9,7 @@ class ProductManagerFile{
     readFile = async () => {
         try {
             const data = await fs.promises.readFile(this.path, 'utf-8')
-            console.log(data)
+            logger.info(data)
             return JSON.parse(data)            
         } catch (error) {
             return []
@@ -36,7 +37,7 @@ class ProductManagerFile{
             let products = await this.readFile()
             // si esta no lo voy a crear 
             const productDb = products.find(product => product.code === newItem.code)
-            console.log(productDb)
+            logger.info(productDb)
             if (productDb) {
                 return `Se encuenta el producto`
             }
@@ -65,10 +66,10 @@ class ProductManagerFile{
     }
     async deleteProduct(pid) {
         const products = await this.readFile()
-        if (!products.some(product => product.id === pid)) return console.log('El producto que quiere borrar no existe.')
+        if (!products.some(product => product.id === pid)) return logger.warning('El producto que quiere borrar no existe.')
         const productsDelete = products.filter(product => product.id !== pid);
         await fs.promises.writeFile(this.path, JSON.stringify(productsDelete, null, 2),'utf-8')
-        console.log('Producto eliminado.')
+        logger.info('Producto eliminado.')
     }
 }
 

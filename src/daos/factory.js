@@ -1,4 +1,5 @@
 const { configObject } = require('../config/index.js')
+const { logger } = require('../util/logger.js')
 
 let UserDao
 let ProductDao
@@ -7,7 +8,8 @@ let MessageDao
 let ProductFile
 let CartFile
 
-console.log("Persistnece factory: ", configObject.persistence)
+logger.info(`Persistnece factory: ${configObject.persistence}`)
+
 
 switch (configObject.persistence) {
     case 'MONGO':

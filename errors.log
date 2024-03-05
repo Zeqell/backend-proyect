@@ -1,0 +1,2 @@
+{"level":"warn","message":"alerta esto es un warning en el endpoint de pruebas/logger"}
+{"level":"error","message":"alerta esto es un error en el endpoint de pruebas/logger"}

@@ -1,7 +1,9 @@
+const { logger } = require("../../util/logger");
+
 const socket = io()
 
 socket.on('products', (data) => {
-    console.log('Received products:', data);
+    logger.info('Received products:', data);
     const productsList = document.getElementById('products')
     productsList.innerHTML = ""
 
@@ -23,8 +25,8 @@ const removeProduct = (id) => {
         method: 'DELETE'
     })
         .then(response => response.json())
-        .then(data => console.log(data))
-        .catch(error => console.error("Error:", error))
+        .then(data => logger.info(data))
+        .catch(error => logger.error("Error:", error))
 }
 
 const addProduct = () => {
@@ -56,12 +58,12 @@ const addProduct = () => {
     })
         .then((response) => response.json())
         .then((data) => {
-            console.log("Success:", data);
+            logger.info("Success:", data);
             if (data.status === "error") {
                 alert(data.message);
             }
         })
         .catch((error) => {
-            console.error("Error:", error);
+            logger.error("Error:", error);
         });
 }   

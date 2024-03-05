@@ -1,4 +1,5 @@
 const fs = require('node:fs')
+const { logger } = require('../../util/logger')
 const path = './src/mockDB/carts.json'
 
 class CartsManager{
@@ -8,7 +9,7 @@ class CartsManager{
     readFile = async () => {
         try {
             const data = await fs.promises.readFile(this.path, 'utf-8')
-            console.log(data)
+            logger.info(data)
             return JSON.parse(data)
         } catch (error) {
             return []

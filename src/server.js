@@ -10,6 +10,7 @@ const cookie = require('cookie-parser')
 const configureSocketIO = require('./helpers/serverOI.js')
 const handlebars = require('express-handlebars')
 const { handleError } = require('./middleware/error/handleError.js')
+const { addLogger, logger } = require('./util/logger.js')
 const handlebarsHelpers = require('handlebars-helpers')()
 const eq = handlebarsHelpers.eq
 
@@ -34,6 +35,8 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }))
+
+app.use(addLogger)
 app.use(appRouter)
 app.use(handleError)
 
@@ -52,7 +55,7 @@ app.set('views', __dirname + '/views')
 connectDb()
 
 const serverHttp = app.listen(PORT, () => {
-    console.log(`Conectado en el puerto ${PORT}`)
+    logger.info(`Conectado en el puerto ${PORT}`)
 })
 
 const io = configureSocketIO(serverHttp)
