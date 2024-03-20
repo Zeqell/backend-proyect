@@ -1,5 +1,7 @@
 const { productService, userService, cartService } = require('../repositories/service.js')
 const { logger } = require('../util/logger.js')
+const { sendPasswordResetEmail, verifyResetToken } = require('../util/resetPassword.js')
+const { createHash, isValidPassword } = require('../util/passwords.js')
 
 class ViewsController {
     constructor(){
@@ -157,6 +159,57 @@ class ViewsController {
             logger.error(err)
             res.status(500).send('Server error')
         }
+    }
+
+    resetPasswordView = async(req, res) => {
+        res.render('resetPassword')
+    }
+
+    sendResetEmail = async (req, res) => {
+        const { userId, userEmail } = req.body
+        logger.info('userid: ', userId)
+        logger.info('useremail: ', userEmail)
+        try {
+            // Enviar el correo electrónico de restablecimiento de contraseña
+            await sendPasswordResetEmail(userId, userEmail)
+            res.status(200).json({ message: 'Correo electrónico enviado exitosamente' })
+        } catch (error) {
+            console.error('Error al enviar el correo electrónico:', error)
+            res.status(500).json({ error: 'Error al enviar el correo electrónico' })
+        }
+    }
+
+    resetPassword = async (req, res) => {
+        const { token, newPassword } = req.body
+    
+        try {
+            const decodedToken = verifyResetToken(token)
+            if (!decodedToken) {
+                return res.status(400).json({ error: 'Token inválido o expirado' })
+            }
+    
+            const user = await this.userViewService.getUserBy(decodedToken.userId)
+            if (!user) {
+                return res.status(400).json({ error: 'Usuario no encontrado' })
+            }
+    
+            if (isValidPassword(newPassword, { password: user.password })) {
+                return res.status(400).json({ error: 'No puedes utilizar la misma contraseña anterior' })
+            }
+    
+            await this.userViewService.updateUserPassword(decodedToken.userId, createHash(newPassword))
+    
+            res.status(200).json({ message: 'Contraseña restablecida exitosamente' })
+        } catch (error) {
+            logger.error('Error al restablecer la contraseña:', error)
+            res.status(500).json({ error: 'Error al restablecer la contraseña' })
+        }
+    }
+
+    resetPasswordView = async(req, res) => {
+        const { token } = req.params
+        
+        res.render('resetPassword', { token })
     }
 
 }

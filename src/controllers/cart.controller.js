@@ -187,6 +187,19 @@ class CartController {
                     code:EErrors.INVALID_TYPES_ERROR
                 })
             }
+            if (user.role === 'premium') {
+                // Obtener información sobre el producto
+                const productInfo = await this.productService.getProductById(pid)
+    
+                // Verificar si el producto pertenece al usuario
+                if (productInfo.owner === user.email) {
+                    return res.status(403).json({
+                        status: 'error',
+                        message: 'Unauthorized to add this product to your cart',
+                    })
+                }
+            }
+
             logger.info(cId)
             await this.cartService.addProductToCart(cId, pid)
 
@@ -236,7 +249,6 @@ class CartController {
                 ))
 
                 const quantity = item.quantity
-
                 totalAmount += (quantity * productPrice)
             }
 

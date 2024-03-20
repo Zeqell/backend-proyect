@@ -13,7 +13,8 @@ const {
     logout,
     current,
     github,
-    githubCallback
+    githubCallback,
+    toggleUserRole
 } = new SessionController()
 
 
@@ -32,6 +33,7 @@ router.get('/githubcallback', passport.authenticate('github', {failureRedirect: 
 router.get('/protected-route', isAuthenticated, (req, res) => {
     res.json({ message: 'Protected route' })
 })
+router.get('/premium/:uid', toggleUserRole)
 
 
 module.exports = router

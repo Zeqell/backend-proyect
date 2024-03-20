@@ -1,10 +1,24 @@
-import ProductsCard from "../ProductsCart/ProductsCard"
+import Card from 'react-bootstrap/Card'
+import ListGroup from 'react-bootstrap/ListGroup'
 
-const ProductsList = ({products}) => {
+const ProductsList = ({ product }) => {
     return (
-    <div>
-        {products.map(product =><ProductsCard key={product._id} product={product}/>)}
-    </div>
+        <Card style={{ width: '18rem' }}>
+            <Card.Img variant="top" src={product.thumbnail} />
+            <Card.Body>
+                <Card.Title>{product.title}</Card.Title>
+                <Card.Text>
+                    {product.description}
+                </Card.Text>
+            </Card.Body>
+            <ListGroup className="list-group-flush">
+                <ListGroup.Item>${product.price}</ListGroup.Item>
+                <ListGroup.Item>Available: {product.stock}</ListGroup.Item>
+            </ListGroup>
+            <Card.Body>
+                <Card.Link href="#">Add To Cart</Card.Link>
+            </Card.Body>
+        </Card>
     )
 }
 

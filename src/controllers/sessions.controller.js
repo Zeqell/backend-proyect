@@ -89,7 +89,6 @@ class SessionController {
             if(user.email === 'adminCoder@coder.com' && password === user.password){
     
                 await this.userService.updateRole(user._id, 'admin')
-                logger.info('-----------')
                 req.session.user = {
                     id: user._id,
                     first_name: user.first_name,
@@ -182,6 +181,23 @@ class SessionController {
     githubCallback = (req, res) => {
         req.session.user = req.user
         res.redirect('/products')
+    }
+
+    toggleUserRole = async (req, res, next) => {
+        try {
+            const { uid } = req.params
+            logger.info(uid)
+            const user = await this.userService.getUserBy(uid)
+            logger.info('user: ', user)
+            if (!user) {
+                return res.status(404).json({ message: 'User not found' })
+            }
+            user.role = user.role === 'user' ? 'premium' : 'user'
+            await user.save()
+            res.status(200).json({ message: `User role updated to ${user.role}` })
+        } catch (error) {
+            next(error)
+        }
     }
 }
 
