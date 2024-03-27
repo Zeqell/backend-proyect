@@ -1,0 +1,173 @@
+paths:
+  /api/products/:
+    get:
+      summary: Obtiene todos los productos
+      tags:
+        - Products
+      responses:
+        '200':
+          description: Los productos se obtuvieron correctamente.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+        '500':
+          description: Error del servidor
+    post:
+      summary: Crear nuevo producto
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                $ref: '#/components/requestBodies/updateProduct'
+      responses:
+        '201':
+          description: El producto se actualizó correctamente.
+        '500':
+          description: Error del servidor
+  /api/products/{pid}:
+    get:
+      summary: Obtener producto por ID
+      tags:
+        - Products
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: Id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: El producto se obtuvo correctamente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '500':
+          description: Error del servidor
+    put:
+      summary: Actualizar producto por ID
+      tags:
+        - Products
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: Id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: El producto se obtuvo correctamente.
+        '500':
+          description: Error del servidor
+      requestBody:
+        required: true
+        content:
+            application/json:
+              schema:
+                $ref: '#/components/requestBodies/updateProduct'
+    delete:
+      summary: Eliminar producto por ID
+      tags:
+        - Products
+      parameters:
+        - name: pid
+          in: path
+          required: true
+          description: Id
+          schema:
+            type: string
+      responses:
+        '200':
+          description: El producto se obtuvo correctamente.
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Product'
+        '500':
+          description: Error del servidor
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: ID autogenerado por mongo
+        title:
+          type: string
+          description: Título generado por el usuario
+        description:
+          type: string
+          description: Descripcion generado por el usuario
+        price:
+          type: number
+          description: Precio generado por el usuario
+        thumbnail:
+          type: array
+          description: Imagen generado por el usuario
+        code:
+          type: string
+          description: Codigo generado por el usuario
+        stock:
+          type: number
+          description: Stock generado por el usuario
+        status:
+          type: boolean
+          description: Status generado por el usuario
+        category:
+          type: string
+          description: Categoria generado por el usuario
+        owner:
+          type: string
+          description: Owner generado por el usuario
+
+  requestBodies:
+    updateProduct:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Título generado por el usuario
+        description:
+          type: string
+          description: Descripcion generado por el usuario
+        price:
+          type: number
+          description: Precio generado por el usuario
+        thumbnail:
+          type: array
+          description: Imagen generado por el usuario
+        code:
+          type: string
+          description: Codigo generado por el usuario
+        stock:
+          type: number
+          description: Stock generado por el usuario
+        status:
+          type: boolean
+          description: Status generado por el usuario
+        category:
+          type: string
+          description: Categoria generado por el usuario
+        owner:
+          type: string
+          description: Owner generado por el usuario
+      example:
+        title: Test producto
+        description: Descripcion test producto
+        price: '2500'
+        thumbnail: ['img']
+        code: cod3
+        stock: '300'
+        status: true
+        category: category
+        owner: admin

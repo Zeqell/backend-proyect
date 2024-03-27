@@ -11,6 +11,8 @@ const configureSocketIO = require('./helpers/serverOI.js')
 const handlebars = require('express-handlebars')
 const { handleError } = require('./middleware/error/handleError.js')
 const { addLogger, logger } = require('./util/logger.js')
+const swaggerJsDoc = require('swagger-jsdoc')
+const swaggerUiExpress = require('swagger-ui-express')
 const handlebarsHelpers = require('handlebars-helpers')()
 const eq = handlebarsHelpers.eq
 
@@ -39,6 +41,20 @@ app.use(session({
 app.use(addLogger)
 app.use(appRouter)
 app.use(handleError)
+
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.1',
+        info: {
+            title: 'Documentacion Ecommerce',
+            description: 'Doc API para ecommerce'
+        }
+    },
+    apis: [`${__dirname}/docs/**/*.yaml`]
+}
+
+const specs = swaggerJsDoc(swaggerOptions)
+app.use('/apidocs', swaggerUiExpress.serve, swaggerUiExpress.setup(specs))
 
 initializePassport()
 app.use(passport.initialize())
