@@ -2,9 +2,9 @@
   "name": "proyect-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha src/test/productRouterTest.test.js",
     "start:dev": "node --watch src/server.js --mode production",
     "dev": "nodemon src/server.js --mode development"
   },
@@ -41,5 +41,10 @@
     "sweetalert2": "^11.10.5",
     "twilio": "^4.22.0",
     "winston": "^3.12.0"
+  },
+  "devDependencies": {
+    "chai": "^5.1.0",
+    "mocha": "^10.4.0",
+    "supertest": "^6.3.4"
   }
 }
