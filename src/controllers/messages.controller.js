@@ -10,7 +10,7 @@ class messageController {
         try {
             return await this.messageService.getAllMessages()
         } catch (error) {
-            logger.error('Error getting messages:', error)
+            logger.error('Error al recibir mensajes:', error)
             throw error
         }
     }
@@ -19,7 +19,7 @@ class messageController {
         try {
             return await this.messageService.getMessagesByUser(user)
         } catch (error) {
-            logger.error('Error getting messages by user:', error)
+            logger.error('Error al recibir mensajes del usuario:', error)
             throw error
         }
     }
@@ -28,7 +28,7 @@ class messageController {
         try {
             return await this.messageService.addMessageToUser(user, message)
         } catch (error) {
-            logger.error('Error adding message to user:', error)
+            logger.error('Error del usuario al agregar el mensaje:', error)
             throw error
         }
     }
@@ -37,7 +37,7 @@ class messageController {
         try {
             return await this.messageService.createUserWithMessage(user, message)
         } catch (error) {
-            logger.error('Error creating user with message:', error)
+            logger.error('Error del usuario al crear mensaje:', error)
             throw error
         }
     }

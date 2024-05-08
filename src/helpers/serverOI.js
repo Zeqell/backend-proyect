@@ -10,8 +10,8 @@ function configureSocketIO(serverHttp) {
     const productsController = new ProdcutsController()
     const messageController = new MessageController()
 
-    io.on('connection', socket => {
-        logger.info('New client connection')
+    io.on('conexión', socket => {
+        logger.info('Nuevo cliente conectado')
 
         socket.on('newProduct', async addProduct => {
             await productsController.addProduct(addProduct)
@@ -22,7 +22,7 @@ function configureSocketIO(serverHttp) {
         socket.on('deleteProduct', async deleteProductById => {
             await productsController.deleteProduct(deleteProductById)
             const productsList = await productsController.getProducts()
-            logger.info('Products sent:', productsList);
+            logger.info('Productos enviados:', productsList);
             socket.emit('products', productsList)
         })
 
@@ -39,7 +39,7 @@ function configureSocketIO(serverHttp) {
 
                 io.emit('messageLogs', { user: data.user, message: newMessage })
             } catch (error) {
-                logger.error('Error saving message to database:', error)
+                logger.error('Error al guardar el mensaje en la base de datos:', error)
             }
         })
     })

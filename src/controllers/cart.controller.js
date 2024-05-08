@@ -5,6 +5,7 @@ const customError = require('../services/CustomError.js')
 const { generateCartErrorInfo, generateCartRemoveErrorInfo  } = require('../services/generateErrorInfo.js')
 const { EErrors } = require('../services/enums.js')
 const { logger } = require('../util/logger.js')
+const { sendMail } = require('../util/sendMail.js')
 
 class CartController {
     constructor(){
@@ -23,7 +24,7 @@ class CartController {
             })
         }catch(error){
             logger.error(error)
-            res.status(500).send('Server error')
+            res.status(500).send('Error del servidor')
         }
     }
 
@@ -36,7 +37,7 @@ class CartController {
             })
         }catch(error){
             logger.error(error)
-            res.status(500).send('Server error')
+            res.status(500).send('Error del servidor')
         }
     }
 
@@ -51,11 +52,11 @@ class CartController {
                 })
             }
             else{
-                res.status(404).send("Product not exist");
+                res.status(404).send("El producto no existe");
             }
         }catch(error){
             logger.error(error)
-            res.status(500).send('Server error')
+            res.status(500).send('Error del servidor')
         }
     }
 
@@ -72,7 +73,7 @@ class CartController {
             
         }catch(error){
             logger.error(error)
-            res.status(500).send('Server error')
+            res.status(500).send('Error del servidor')
         }
     }
 
@@ -81,10 +82,10 @@ class CartController {
             const { cid, pid } = req.params
             if(!cid || !pid){
                 customError.createError({
-                    name:'Error to remove product from cart',
+                    name:'Error al eliminar el producto del carrito',
                     cause: generateCartRemoveErrorInfo(cid, pid),
-                    message: 'Cant remove product from cart',
-                    code:EErrors.INVALID_TYPES_ERROR
+                    message: 'No puede eliminar el producto del carrito',
+                    code:EErrors.DATABASES_ERROR
                 })
             }
             const result = await this.cartService.removeProductFromCart(cid, pid)
@@ -92,12 +93,12 @@ class CartController {
             if (result.success) {
                 res.json({
                 status: 'success',
-                message: 'Product removed from cart successfully',
+                message: 'Producto eliminado del carrito con éxito',
                 })
             } else {
                 res.status(404).json({
                 status: 'error',
-                message: 'Product or cart not found',
+                message: 'Producto o carrito no encontrado',
                 })
             }
         } catch (error) {
@@ -114,17 +115,17 @@ class CartController {
             if (result.success) {
                 res.json({
                     status: 'success',
-                    message: 'Cart updated successfully',
+                    message: 'Carrito actualizado exitosamente',
                 })
             } else {
                 res.status(404).json({
                     status: 'error',
-                    message: 'Cart not found',
+                    message: 'Carrito no encontrado',
                 })
             }
         } catch (error) {
             logger.error(error)
-            res.status(500).send('Server error')
+            res.status(500).send('Error del servidor')
         }
     }
 
@@ -138,17 +139,17 @@ class CartController {
             if (result.success) {
                 res.json({
                     status: 'success',
-                    message: 'Product quantity updated successfully',
+                    message: 'Cantidad de producto actualizada correctamente',
                 })
             } else {
                 res.status(404).json({
                     status: 'error',
-                    message: 'Cart or product not found',
+                    message: 'Carrito o producto no encontrado',
                 })
             }
         } catch (error) {
             logger.error(error);
-            res.status(500).send('Server error')
+            res.status(500).send('Error del servidor')
         }
     }
 
@@ -170,66 +171,74 @@ class CartController {
             }
         } catch (error) {
             logger.error(error)
-            res.status(500).send('Server error')
+            res.status(500).send('Error del servidor')
         }
     }
 
     addProductToCart2 = async (req, res, next) => {
         try {
-            const { pid } = req.params
-            const user = req.session.user
-            const cId = user.cart
-            if (!user || !user.cart) {
-                customError.createError({
-                    name: 'Add product to cart error',
-                    cause: generateCartErrorInfo(user, cId),
-                    message: 'Error tryng add product to cart',
-                    code:EErrors.INVALID_TYPES_ERROR
-                })
-            }
+            console.log("Entre al add");
+            const { pid } = req.params;
+            console.log("PID:", pid);
+            const {user} = req.body
+            console.log("Soy el user:", user);
+            const cId = user.cart;
+            console.log("Carrito ID:", cId);
+            
             if (user.role === 'premium') {
-                // Obtener información sobre el producto
-                const productInfo = await this.productService.getProductById(pid)
+                console.log("Soy premium");
+                const productInfo = await this.productService.getProductById(pid);
+                
+                if (!productInfo) {
+                    return res.status(404).json({
+                        status: 'error',
+                        message: 'Producto no encontrado',
+                    });
+                }
     
-                // Verificar si el producto pertenece al usuario
-                if (productInfo.owner === user.email) {
+                if (productInfo && productInfo.owner && productInfo.owner.toString() === user._id.toString()) {
                     return res.status(403).json({
                         status: 'error',
-                        message: 'Unauthorized to add this product to your cart',
-                    })
+                        message: 'No autorizado para agregar este producto a su carrito',
+                    });
                 }
             }
-
-            logger.info(cId)
-            await this.cartService.addProductToCart(cId, pid)
-
+            
+            await this.cartService.addProductToCart(cId, pid);
             res.json({
                 status: 'success',
-                message: 'Product added to cart successfully',
-            })
+                message: 'Producto agregado al carrito exitosamente',
+            });
         } catch (error) {
-            next(error)
+            console.error("Error en addProductToCart2:", error);
+            res.status(500).json({
+                status: 'error',
+                message: 'Internal Server Error',
+            });
         }
     }
 
     purchaseCart = async (req, res) => {
         try {
             const { cid } = req.params
-            
+            const { user } = req.body
+            console.log("Entree al purchase ", cid)
+            console.log("Compra iniciado por el usuario:", user)
             const cart = await this.cartService.getCartById(cid)
             if (!cart) {
-                return res.status(404).json({ status: 'error', message: 'Cart not found' })
+                return res.status(404).json({ status: 'error', message: 'Carrito no encontrado' })
             }
             const productUpdates = []
             const productsNotPurchased = []
             let totalAmount = 0
+            const purchasedProducts = []
             for (const item of cart) {
                 const productId = item.product.toString()
                 const productArray = await this.productService.getProductById(productId)
                 const product = productArray[0]
                 const productPrice = product.price
                 if (!product) {
-                    return res.status(404).json({ status: 'error', message: 'Product not found' })
+                    return res.status(404).json({ status: 'error', message: 'Producto no encontrado' })
                 }
                 if (product.stock < item.quantity) {
                     productsNotPurchased.push(item.product)
@@ -237,6 +246,7 @@ class CartController {
                 }
                 product.stock -= item.quantity
                 logger.info(product)
+                console.log(product)
                 productUpdates.push(this.productService.updateProduct(productId,
                     product.title, 
                     product.description, 
@@ -250,11 +260,17 @@ class CartController {
 
                 const quantity = item.quantity
                 totalAmount += (quantity * productPrice)
+
+                purchasedProducts.push({
+                    title: product.title,
+                    quantity,
+                    price: product.price
+                })
             }
 
             logger.info(totalAmount)
-            const userEmail = req.session.user.email
-
+            const userEmail = user.email
+            console.log(userEmail)
             const ticketData = {
                 code: 'TICKET-' + Date.now().toString(36).toUpperCase(),
                 purchase_datetime: new Date(),
@@ -270,17 +286,38 @@ class CartController {
                 await cart.save()
             } else {
                 await this.cartService.deleteAllProducts(cid)
-                logger.info('----------Cart empty----------')
+                logger.info('----------Carrito vacio----------')
             }
+
+            const emailSubject = `Detalles de la compra - Ticket ${ticketData.code}`;
+            const emailBody = `
+                <p>Gracias por su compra, ${user.first_name} ${user.last_name}!</p>
+                <p>Detalles de tu ticket:</p>
+                <ul>
+                    <li><strong>Ticket Code:</strong> ${ticketData.code}</li>
+                    <li><strong>Fecha de compra:</strong> ${ticketData.purchase_datetime}</li>
+                    <li><strong>Cantidad total:</strong> ${ticketData.amount.toFixed(2)}</li>
+                </ul>
+                <p>Productos comprados:</p>
+                <ul>
+                    ${purchasedProducts.map(product => `
+                        <li>
+                            <strong>${product.title}</strong> - Quantity: ${product.quantity}, Price: $${product.price.toFixed(2)}
+                        </li>
+                    `).join('')}
+                </ul>
+            `
+            await sendEmail(user.email, emailSubject, emailBody)
+
             try {
                 await Promise.all(productUpdates)
-                return res.status(200).json({ status: 'success', message: 'Stock updated successfully' })
+                return res.status(200).json({ status: 'success', message: 'Stock actualizado exitosamente' })
             } catch (error) {
-                return res.status(500).json({ status: 'error', message: 'Failed to update stock' })
+                return res.status(500).json({ status: 'error', message: 'Failed to update el stock' })
             }
         } catch (error) {
             logger.error(error)
-            res.status(500).json({ status: 'error', message: 'Server error' })
+            res.status(500).json({ status: 'error', message: 'Error del servidor' })
         }
     }
 

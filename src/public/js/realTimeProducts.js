@@ -1,10 +1,9 @@
-const { logger } = require("../../util/logger");
-
 const socket = io()
 
 socket.on('products', (data) => {
-    logger.info('Received products:', data);
+    console.log(data)
     const productsList = document.getElementById('products')
+    console.log(productsList)
     productsList.innerHTML = ""
 
     data.forEach((product) => {
@@ -21,12 +20,12 @@ socket.on('products', (data) => {
 })
 
 const removeProduct = (id) => {
-    fetch(`/api/products/${id}`, {
+    fetch(`/products/${id}`, {
         method: 'DELETE'
     })
         .then(response => response.json())
-        .then(data => logger.info(data))
-        .catch(error => logger.error("Error:", error))
+        .then(data => console.log(data))
+        .catch(error => console.log(error))
 }
 
 const addProduct = () => {
@@ -49,7 +48,7 @@ const addProduct = () => {
         status,
         category,
     }
-    fetch('api/products', {
+    fetch('/products', {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",
@@ -58,12 +57,12 @@ const addProduct = () => {
     })
         .then((response) => response.json())
         .then((data) => {
-            logger.info("Success:", data);
+            console.log("success: ", data)
             if (data.status === "error") {
                 alert(data.message);
             }
         })
         .catch((error) => {
-            logger.error("Error:", error);
+            console.log("error: ", error)
         });
 }   

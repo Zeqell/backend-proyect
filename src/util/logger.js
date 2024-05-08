@@ -1,63 +1,44 @@
 const winston = require('winston')
-const { program } = require('../config/comander')
 
-const { mode } = program.opts()
-
-const customLevelOption = {
+const customLevelOptions = {
     levels: {
         fatal: 0,
         error: 1,
-        warning: 2,
+        warn: 2,
         info: 3,
         debug: 4,
         http: 5
     },
     colors: {
-        fatal: 'red',
-        error: 'yellow',
-        warning: 'yellow',
-        info: 'blue',
+        fatal: 'magenta',
+        error: 'red',
+        warn: 'yellow',
+        info: 'cyan',
         debug: 'white',
+        http: 'green'
     }
 }
 
-const transportOption = {
-    development: [
+const logger = winston.createLogger({
+    levels: customLevelOptions.levels,
+    transports: [
         new winston.transports.Console({
-            level: 'debug',
+            level: process.env.PORT === 8080 ? 'info' : 'debug',
             format: winston.format.combine(
-                winston.format.colorize({ colors: customLevelOption.colors }),
-                winston.format.simple()
-            )
-        }),
-    ],
-    production: [
-        new winston.transports.Console({
-            level: 'info',
-            format: winston.format.combine(
-                winston.format.colorize({ colors: customLevelOption.colors }),
+                winston.format.colorize({ colors: customLevelOptions.colors }),
                 winston.format.simple()
             )
         }),
         new winston.transports.File({
-            filename: '/errors.log',
+            filename: './errors.log',
             level: 'error',
             format: winston.format.simple()
         })
     ]
-}
-
-const logger = winston.createLogger({
-    levels: customLevelOption.levels,
-    transports: transportOption[mode]
 })
 
-
-//middleware para mostrar por consola los logg de consultas http
 const addLogger = (req, res, next) => {
     req.logger = logger
-    //req.logger.http(`${req.method} on ${req.url} - ${new Date().toLocaleTimeString()}`)
-    req.logger.info(`${req.method} on ${req.url} - ${new Date().toLocaleTimeString()}`)
     next()
 }
 

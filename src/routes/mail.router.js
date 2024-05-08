@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const { sendMail } = require('../../util/sendMail.js')
+const { sendMail } = require('../util/sendMail.js')
 
 const router = Router()
 

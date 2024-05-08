@@ -26,20 +26,33 @@ class userDaoMongo {
         try{
             return await this.userModel.findByIdAndUpdate(userId, { role: newRole }, { new: true })
         }catch (err){
-            logger.error('Error updating user role:', err)
+            logger.error('Error al actualizar el rol de usuario:', err)
         }
     }
-    
+
     async updatePassword(uid, newPassword) {
         try {
             return await this.userModel.findByIdAndUpdate(uid, { password: newPassword }, { new: true })
         } catch (error) {
-            logger.error('Error updating user password:', error)
+            logger.error('Error al actualizar la contraseña del usuario:', error)
         }
     }
 
     async delete(uid) {
         return await this.userModel.findOneAndDelete({_id: uid})
+    }
+
+    async findInactive(dateThreshold) {
+        try {
+            const inactiveUsers = await this.userModel.find({
+                last_connection: { $lt: dateThreshold }
+            })
+
+            return inactiveUsers
+        } catch (error) {
+            logger.error('Error al encontrar usuarios inactivos:', error)
+            throw new Error('Error al encontrar usuarios inactivos')
+        }
     }
 }
 

@@ -15,6 +15,7 @@ const configObject = {
     jwt_code: process.env.JWT_SECRET_CODE,
     mongo_uri: process.env.MONGO_URI,
     persistence: process.env.PERSISTENCE,
+    stripe_secret_key: process.env.STRIPE_SECRET_KEY, 
     // uadmins: process.env.USERS_ADMIN,
     // uadmin_pass: process.env.USER_ADMIN_PASS,
     // gh_client_id: process.env.GITHUB_CLIENT_ID,

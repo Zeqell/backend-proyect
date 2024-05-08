@@ -9,7 +9,6 @@ const appRouter = require('./routes/index.js')
 const cookie = require('cookie-parser')
 const configureSocketIO = require('./helpers/serverOI.js')
 const handlebars = require('express-handlebars')
-const { handleError } = require('./middleware/error/handleError.js')
 const { addLogger, logger } = require('./util/logger.js')
 const swaggerJsDoc = require('swagger-jsdoc')
 const swaggerUiExpress = require('swagger-ui-express')
@@ -18,7 +17,9 @@ const eq = handlebarsHelpers.eq
 
 const PORT = process.env.PORT
 const app = express()
-
+// app.get('/realTimeProducts.js', (req, res) => {
+//     res.type('application/javascript');
+// });
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 app.use(express.static(__dirname + '/public'))
@@ -40,7 +41,7 @@ app.use(session({
 
 app.use(addLogger)
 app.use(appRouter)
-app.use(handleError)
+// app.use(handleError)
 
 const swaggerOptions = {
     definition: {

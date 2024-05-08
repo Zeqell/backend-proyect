@@ -1,23 +1,23 @@
 const generateProductErrorInfo = (product) => {
-    return `One or more properties were incomplete or not valid.
+    return `Una o más propiedades estaban incompletas o no eran válidas.
         list of requires properties
-        - Product: product not found, recived ${product}
-        - Product not added: can't add new product to database
-        - Product no deleted: not found a product to delete
+        - Product: producto no encontrado, recibido ${product}
+        - Product not added: no se puede agregar un nuevo producto a la base de datos
+        - Product no deleted: no se encontró un producto para eliminar
     `
 }
 
 const generateCartErrorInfo = (user, cartId) => {
-    return `One or more properties were incomplete or not valid.
+    return `Una o más propiedades estaban incompletas o no eran válidas.
         list of requires properties
-        - Product not added to cart: can't add product to cart, recived ${user} and ${cartId}
+        - Product not added to cart: no se puede agregar el producto al carrito, recibí ${user} y ${cartId}
     `
 }
 
 const generateCartRemoveErrorInfo = (cid, pid) => {
-    return `One or more properties were incomplete or not valid.
+    return `Una o más propiedades estaban incompletas o no eran válidas.
         list of requires properties
-        - Product not removed to cart: can't remove product to cart, recived ${cid} and ${pid}
+        - Product not removed to cart: No puedo eliminar el producto al carrito, recibido ${cid} y ${pid}
     `
 }
 

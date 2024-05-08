@@ -8,9 +8,6 @@ let MessageDao
 let ProductFile
 let CartFile
 
-logger.info(`Persistnece factory: ${configObject.persistence}`)
-
-
 switch (configObject.persistence) {
     case 'MONGO':
         const UserDaoMongo = require('./mongo/userDaoMongo.js')

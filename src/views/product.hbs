@@ -1,15 +1,15 @@
 <main>
     <header>
-        <h3 class="text-center">List of Products</h3>
+        <h3 class="text-center">Lista de Productos</h3>
     </header>
     {{#if user}}
         {{#eq user.role 'admin'}}
             <div class="welcome">
-                <p>Welcome Admin, enjoy shopping!</p>
+                <p>Bienvenido administrador, ¡Disfrute comprando!</p>
             </div>
         {{else}}
             <div class="welcome">
-                <p>Welcome {{user.first_name}} {{user.last_name}} , enjoy shopping!</p>
+                <p>Bienvenido {{user.first_name}} {{user.last_name}} , ¡Disfrute comprando!</p>
             </div>
         {{/eq}}
     {{/if}}
@@ -17,8 +17,8 @@
         <ul>
             {{#each docs}}
                 <li>{{this.thumbnail}}</li>
-                <li>Title: {{this.title}}</li>
-                <a href="/products/details/{{this._id}}" class="btn btn-dark" style="margin: 5px">Details</a>
+                <li>Titulo: {{this.title}}</li>
+                <a href="/products/details/{{this._id}}" class="btn btn-dark" style="margin: 5px">Detalles</a>
                 <hr>
             {{/each}}
         </ul>

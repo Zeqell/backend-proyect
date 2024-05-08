@@ -1,6 +1,6 @@
 const { Router } = require('express')
-const ProdcutsController = require('../../controllers/products.controller.js')
-const { isAdminOrPremium } = require('../../middleware/roleVerification.js')
+const ProdcutsController = require('../controllers/products.controller.js')
+const { isAdminOrPremium } = require('../middleware/roleVerification.js')
 
 const router = Router()
 const {

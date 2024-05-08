@@ -22,18 +22,20 @@ class cartDaoMongo {
     }
 
     async getById(cid) {
+        console.log("cart id en el dao:", cid)
         const cart = await this.model.findOne({ _id: cid }).lean()
-
+        console.log("Carrito exitoso", cart)
         if (cart) {
             return cart.products
         } else {
-            logger.warning("This cart does not exist")
+            logger.error("Este carrito no existe")
             return { cart: { products: [] } }
         }
     }
 
-    async add(cartId, productId) {
-        let cart = await this.model.findOne({ _id: cartId })
+    async add(cId, pid) {
+        console.log("datpssss", cId, pid)
+        let cart = await this.model.findOne({ _id: cId })
             
         if (!cart) {
             const newCart = await this.model.create({
@@ -42,23 +44,23 @@ class cartDaoMongo {
             cart = newCart
         }
 
-        const existingProductIndex = cart.products.findIndex((item) => item.product.equals(productId))
+        const existingProductIndex = cart.products.findIndex((item) => item.product.equals(pid))
 
         if (existingProductIndex !== -1) {
             cart.products[existingProductIndex].quantity += 1;
         } else {
             cart.products.push({
-            product: productId,
+            product: pid,
             quantity: 1,
             })
         }
 
         await cart.save()
 
-        logger.info("Product added to cart successfully")
+        logger.info("Producto agregado al carrito exitosamente")
         return {
             success: true,
-            message: 'Product added to cart successfully',
+            message: 'Producto agregado al carrito exitosamente',
         }
     }
 
@@ -119,14 +121,14 @@ class cartDaoMongo {
         const cart = await this.model.findOne({ _id: cartId })
 
         if (!cart) {
-            return { success: false, message: 'Cart not found' }
+            return { success: false, message: 'Carrito no encontrado' }
         }
     
         cart.products = []
     
         await cart.save()
     
-        return { success: true, message: 'All products deleted from the cart' }
+        return { success: true, message: 'Todos los productos eliminados del carrito.' }
     }
 
 

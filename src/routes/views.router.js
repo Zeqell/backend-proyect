@@ -1,7 +1,7 @@
 const { Router } = require('express')
 const ViewsController = require('../controllers/views.controller.js')
-const { isAdminOrPremium, isUser } = require('../middleware/roleVerification.js')
-const { authenticateUser } = require('../middleware/handlePasp.js')
+const { isAdminOrPremium, isUser, isAdmin } = require('../middleware/roleVerification.js')
+const { isAuthenticated } = require('../middleware/handlePasp.js')
 
 
 const router = Router()
@@ -17,7 +17,9 @@ const {
     shoppingCart,
     resetPasswordView,
     sendResetEmail,
-    resetPassword
+    resetPassword,
+    resetPasswordViewToken,
+    adminView
 } = new ViewsController()
 
 router.get('/', home)
@@ -34,14 +36,16 @@ router.get('/login', login)
 
 router.get('/register', register)
 
-router.get('/cart', authenticateUser, shoppingCart)
+router.get('/cart', isAuthenticated, shoppingCart)
 
 router.get('/reset-password', resetPasswordView)
 
 router.post('/reset-password', sendResetEmail)
 
-router.get('/reset-password:token', resetPasswordView)
+router.get('/reset-password', resetPasswordViewToken)
 
-router.post('/reset-password:token', resetPassword)
+router.post('/reset-password', resetPassword)
+
+router.get('/admin', isAdmin, adminView)
 
 module.exports = router

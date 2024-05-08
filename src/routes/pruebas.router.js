@@ -1,5 +1,5 @@
 const { Router } = require('express')
-const { generateProducts } = require('../../pruebas/pruebas.js')
+const { generateProducts } = require('../pruebas/pruebas.js')
 // const { warn } = require('winston')
 const { faker } = require('@faker-js/faker')
 

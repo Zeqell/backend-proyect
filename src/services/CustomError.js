@@ -1,5 +1,4 @@
 class CustomError {
-    //static => llamar al metodo sin instanciar
     static createError({name='Error', cause, message, code=1}){
         let error = new Error(message)
 

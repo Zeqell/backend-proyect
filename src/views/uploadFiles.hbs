@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Subir archivos</title>
+</head>
+<body>
+    <h1>Subir archivos</h1>
+
+    <form action="/api/session/{{uid}}/documents" method="POST" enctype="multipart/form-data">
+        <div>
+            <label for="profile">Foto de perfil:</label>
+            <input type="file" id="profile" name="profile">
+        </div>
+
+        <div>
+            <label for="product">Imagen del producto:</label>
+            <input type="file" id="product" name="product">
+        </div>
+
+        <div>
+            <label for="documents">Documents:</label>
+            <input type="file" id="documents" name="documents" multiple>
+        </div>
+
+        <button type="submit">Subir</button>
+    </form>
+</body>
+</html>

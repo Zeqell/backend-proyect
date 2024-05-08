@@ -18,14 +18,14 @@ class messageDaoMongo {
         try {
             const userDocument = await this.model.findOne({ user: user })
             if (!userDocument) {
-                logger.error(`User ${user} not found`)
+                logger.error(`Usuario ${user} no encontrado`)
                 return null
             }
             userDocument.messages.push(message)
             await userDocument.save()
             return userDocument
         } catch (error) {
-            logger.error('Error adding message to user:', error)
+            logger.error('Error al agregar el mensaje al usuario:', error)
             throw error
         }
     }
@@ -39,7 +39,7 @@ class messageDaoMongo {
             await newUserDocument.save()
             return newUserDocument
         } catch (error) {
-            logger.error('Error creating user with message:', error)
+            logger.error('Error al crear:', error)
             throw error
         }
     }

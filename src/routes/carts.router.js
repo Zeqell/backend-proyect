@@ -1,6 +1,6 @@
 const { Router } = require('express')
-const CartController = require('../../controllers/cart.controller.js')
-const { authenticateUser, isAuthenticated } = require('../../middleware/handlePasp.js')
+const CartController = require('../controllers/cart.controller.js')
+// const { authenticateUser, isAuthenticated } = require('../middleware/handlePasp.js')
 
 const router = Router()
 const {
@@ -23,10 +23,10 @@ router
     .post('/:cid/product/:pid', addProductToCart)
     .delete('/:cid/product/:pid', removeProductFromCart)
     .put('/:cid', updateCart)
-    .put('/:cid/products/:pid', updateProductQuantity)
+    .put('/:cid/product/:pid', updateProductQuantity)
     .delete('/:cid', deleteAllProducts)
-    .post('/:pid', isAuthenticated, addProductToCart2)
-    .post('/:cid/purchase', isAuthenticated, purchaseCart)
+    .post('/:pid', addProductToCart2)
+    .post('/:cid/purchase', purchaseCart)
 
 
 module.exports = router
